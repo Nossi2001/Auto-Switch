@@ -1,5 +1,5 @@
 # open_wrt_router.py
-
+# TP-Link, GL.iNet, Netgear
 from router_base import RouterBase
 import paramiko
 import time
