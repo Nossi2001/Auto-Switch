@@ -1,5 +1,4 @@
 # network_scanner.py
-
 import scapy.all as scapy
 from mac_vendor_lookup import MacLookup
 

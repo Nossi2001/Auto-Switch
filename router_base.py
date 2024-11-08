@@ -38,3 +38,4 @@ class RouterBase(ABC):
     @abstractmethod
     def change_ip(self, new_ip):
         pass  # Metoda abstrakcyjna, musi być zaimplementowana w klasach potomnych
+

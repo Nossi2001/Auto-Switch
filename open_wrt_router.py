@@ -119,4 +119,3 @@ class OpenWrtRouter(RouterBase):
         except Exception as e:
             print(f"Wystąpił błąd podczas tworzenia kopii zapasowej: {e}")
             return False
-

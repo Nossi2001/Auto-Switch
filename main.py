@@ -3,6 +3,7 @@ from PyQt6.QtWidgets import (
     QApplication, QWidget, QLabel, QListWidget, QPushButton,
     QVBoxLayout, QLineEdit, QMessageBox, QStackedWidget, QHBoxLayout
 )
+
 from PyQt6.QtCore import Qt
 from Auto_Finder_Router import Auto_Finder_Router
 from open_wrt_router import OpenWrtRouter  # Import klasy OpenWrtRouter
