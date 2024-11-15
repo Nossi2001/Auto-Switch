@@ -9,7 +9,6 @@ if __name__ == "__main__":
     password = 'Wadessa43#' # Hasło do routera
 
     router = OpenWrtRouter(ip=ip, username=username, password=password)
-
     # Nawiązywanie połączenia z routerem
     if router.connect():
         print("Połączono z routerem.")
