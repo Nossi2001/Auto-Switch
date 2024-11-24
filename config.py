@@ -1,1 +1,1 @@
-Producent = ["cisco", "tp-link", "juniper", "netgear", "d-link", "mikrotik", "asus", "gl"]
+Producent = ["cisco", "tp-link", "juniper", "ubiquiti", "d-link", "mikrotik", "asus", "gl"]

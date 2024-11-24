@@ -1,193 +1,207 @@
+# edge_router_gui.py
+
 import sys
 from PyQt6.QtWidgets import (
-    QApplication, QWidget, QLabel, QListWidget, QPushButton,
-    QVBoxLayout, QLineEdit, QMessageBox, QStackedWidget, QHBoxLayout
+    QApplication, QWidget, QLabel, QLineEdit, QPushButton,
+    QVBoxLayout, QHBoxLayout, QTextEdit, QMessageBox
 )
-
 from PyQt6.QtCore import Qt
-from Auto_Finder_Router import Auto_Finder_Router
-from open_wrt_router import OpenWrtRouter  # Import klasy OpenWrtRouter
+from edge_router import EdgeRouter
 
-class RouterConfigurator(QWidget):
+class EdgeRouterGUI(QWidget):
     def __init__(self):
         super().__init__()
         self.init_ui()
+        self.router = None
 
     def init_ui(self):
-        self.stacked_widget = QStackedWidget()
+        self.setWindowTitle('EdgeRouter Configuration')
 
-        # Strona 0: Ekran powitalny z przyciskiem "Skanuj"
-        self.page_scan = QWidget()
-        self.page_scan_layout = QVBoxLayout()
-
-        self.scan_label = QLabel('Kliknij "Skanuj", aby wyszukać urządzenia w sieci.')
-        self.scan_button = QPushButton('Skanuj')
-        self.scan_button.clicked.connect(self.scan_network)
-
-        self.page_scan_layout.addWidget(self.scan_label)
-        self.page_scan_layout.addWidget(self.scan_button)
-        self.page_scan.setLayout(self.page_scan_layout)
-
-        # Strona 1: Lista znalezionych urządzeń
-        self.page_select = QWidget()
-        self.page_select_layout = QVBoxLayout()
-
-        self.device_list_label = QLabel('Znalezione urządzenia:')
-        self.device_list_widget = QListWidget()
-
-        self.select_button = QPushButton('Wybierz')
-        self.select_button.clicked.connect(self.select_device)
-
-        self.page_select_layout.addWidget(self.device_list_label)
-        self.page_select_layout.addWidget(self.device_list_widget)
-        self.page_select_layout.addWidget(self.select_button)
-        self.page_select.setLayout(self.page_select_layout)
-
-        # Strona 2: Formularz logowania
-        self.page_login = QWidget()
-        self.page_login_layout = QVBoxLayout()
-
-        self.login_info_label = QLabel('Zaloguj się do routera:')
-        self.username_label = QLabel('Nazwa użytkownika:')
-        self.username_input = QLineEdit()
-        self.password_label = QLabel('Hasło:')
-        self.password_input = QLineEdit()
+        # Dane logowania
+        self.ip_label = QLabel('Router IP:')
+        self.ip_input = QLineEdit('192.168.55.50')
+        self.username_label = QLabel('Username:')
+        self.username_input = QLineEdit('user')
+        self.password_label = QLabel('Password:')
+        self.password_input = QLineEdit('user')
         self.password_input.setEchoMode(QLineEdit.EchoMode.Password)
 
-        self.login_button = QPushButton('Zaloguj')
-        self.login_button.clicked.connect(self.login_to_router)
+        # Przyciski połączenia
+        self.connect_button = QPushButton('Connect')
+        self.disconnect_button = QPushButton('Disconnect')
+        self.disconnect_button.setEnabled(False)
 
-        self.page_login_layout.addWidget(self.login_info_label)
-        self.page_login_layout.addWidget(self.username_label)
-        self.page_login_layout.addWidget(self.username_input)
-        self.page_login_layout.addWidget(self.password_label)
-        self.page_login_layout.addWidget(self.password_input)
-        self.page_login_layout.addWidget(self.login_button)
-        self.page_login.setLayout(self.page_login_layout)
+        # Pola konfiguracji VLAN
+        self.vlan_id_label = QLabel('VLAN ID:')
+        self.vlan_id_input = QLineEdit()
+        self.parent_interface_label = QLabel('Parent Interface:')
+        self.parent_interface_input = QLineEdit('eth1')
+        self.vlan_address_label = QLabel('VLAN Address:')
+        self.vlan_address_input = QLineEdit('192.168.100.1/24')
+        self.vlan_description_label = QLabel('VLAN Description:')
+        self.vlan_description_input = QLineEdit('Interfejs VLAN 100')
+        self.create_vlan_button = QPushButton('Create VLAN Interface')
+        self.create_vlan_button.setEnabled(False)
 
-        # Strona 3: Zmiana IP i przyciski
-        self.page_configure = QWidget()
-        self.page_configure_layout = QVBoxLayout()
+        # Pola konfiguracji portu dostępu
+        self.access_interface_label = QLabel('Access Interface:')
+        self.access_interface_input = QLineEdit('eth2')
+        self.access_vlan_id_label = QLabel('Access VLAN ID:')
+        self.access_vlan_id_input = QLineEdit()
+        self.configure_access_button = QPushButton('Configure Access Port')
+        self.configure_access_button.setEnabled(False)
 
-        self.ip_label = QLabel('Nowe IP:')
-        self.ip_input = QLineEdit()
+        # Pola konfiguracji portu trunk
+        self.trunk_interface_label = QLabel('Trunk Interface:')
+        self.trunk_interface_input = QLineEdit('eth3')
+        self.allowed_vlans_label = QLabel('Allowed VLANs (comma-separated):')
+        self.allowed_vlans_input = QLineEdit('100,200,300')
+        self.configure_trunk_button = QPushButton('Configure Trunk Port')
+        self.configure_trunk_button.setEnabled(False)
 
-        # Przyciski: Zastosuj, Backup, Wyjdź
-        self.buttons_layout = QHBoxLayout()
-        self.apply_button = QPushButton('Zastosuj')
-        self.apply_button.clicked.connect(self.apply_new_ip)
-        self.backup_button = QPushButton('Backup')
-        self.backup_button.clicked.connect(self.backup_configuration)
-        self.exit_button = QPushButton('Wyjdź')
-        self.exit_button.clicked.connect(self.exit_application)
+        # Pole logów
+        self.log_output = QTextEdit()
+        self.log_output.setReadOnly(True)
 
-        self.buttons_layout.addWidget(self.apply_button)
-        self.buttons_layout.addWidget(self.backup_button)
-        self.buttons_layout.addWidget(self.exit_button)
+        # Układ interfejsu
+        layout = QVBoxLayout()
 
-        self.page_configure_layout.addWidget(self.ip_label)
-        self.page_configure_layout.addWidget(self.ip_input)
-        self.page_configure_layout.addLayout(self.buttons_layout)
-        self.page_configure.setLayout(self.page_configure_layout)
+        # Dane logowania
+        login_layout = QHBoxLayout()
+        login_layout.addWidget(self.ip_label)
+        login_layout.addWidget(self.ip_input)
+        login_layout.addWidget(self.username_label)
+        login_layout.addWidget(self.username_input)
+        login_layout.addWidget(self.password_label)
+        login_layout.addWidget(self.password_input)
+        login_layout.addWidget(self.connect_button)
+        login_layout.addWidget(self.disconnect_button)
+        layout.addLayout(login_layout)
 
-        # Dodanie stron do QStackedWidget
-        self.stacked_widget.addWidget(self.page_scan)       # Indeks 0
-        self.stacked_widget.addWidget(self.page_select)     # Indeks 1
-        self.stacked_widget.addWidget(self.page_login)      # Indeks 2
-        self.stacked_widget.addWidget(self.page_configure)  # Indeks 3
+        # Konfiguracja VLAN
+        vlan_layout = QHBoxLayout()
+        vlan_layout.addWidget(self.vlan_id_label)
+        vlan_layout.addWidget(self.vlan_id_input)
+        vlan_layout.addWidget(self.parent_interface_label)
+        vlan_layout.addWidget(self.parent_interface_input)
+        vlan_layout.addWidget(self.vlan_address_label)
+        vlan_layout.addWidget(self.vlan_address_input)
+        vlan_layout.addWidget(self.vlan_description_label)
+        vlan_layout.addWidget(self.vlan_description_input)
+        vlan_layout.addWidget(self.create_vlan_button)
+        layout.addLayout(vlan_layout)
 
-        # Ustawienie głównego układu
-        main_layout = QVBoxLayout()
-        main_layout.addWidget(self.stacked_widget)
+        # Konfiguracja portu dostępu
+        access_layout = QHBoxLayout()
+        access_layout.addWidget(self.access_interface_label)
+        access_layout.addWidget(self.access_interface_input)
+        access_layout.addWidget(self.access_vlan_id_label)
+        access_layout.addWidget(self.access_vlan_id_input)
+        access_layout.addWidget(self.configure_access_button)
+        layout.addLayout(access_layout)
 
-        self.setLayout(main_layout)
-        self.setWindowTitle('Router Configurator')
-        self.show()
+        # Konfiguracja portu trunk
+        trunk_layout = QHBoxLayout()
+        trunk_layout.addWidget(self.trunk_interface_label)
+        trunk_layout.addWidget(self.trunk_interface_input)
+        trunk_layout.addWidget(self.allowed_vlans_label)
+        trunk_layout.addWidget(self.allowed_vlans_input)
+        trunk_layout.addWidget(self.configure_trunk_button)
+        layout.addLayout(trunk_layout)
 
-    def scan_network(self):
-        # Przejście do strony z listą urządzeń
-        self.stacked_widget.setCurrentIndex(1)
+        # Pole logów
+        layout.addWidget(self.log_output)
 
-        self.device_list_widget.clear()
-        self.device_list_widget.addItem('Skanowanie sieci, proszę czekać...')
-        QApplication.processEvents()  # Aktualizacja GUI
-        self.devices = Auto_Finder_Router()
-        self.device_list_widget.clear()
-        if self.devices:
-            for device in self.devices:
-                item_text = f"IP: {device['ip']}, MAC: {device['mac']}, Producent: {device['vendor']}"
-                self.device_list_widget.addItem(item_text)
-        else:
-            self.device_list_widget.addItem('Nie znaleziono urządzeń.')
+        self.setLayout(layout)
 
-    def select_device(self):
-        selected_items = self.device_list_widget.selectedItems()
-        if not selected_items:
-            QMessageBox.warning(self, 'Brak wyboru', 'Proszę wybrać urządzenie z listy.')
-            return
-        item = selected_items[0]
-        index = self.device_list_widget.row(item)
-        device = self.devices[index]
-        self.selected_device = device  # Zapisujemy wybrane urządzenie
+        # Połączenie sygnałów z metodami
+        self.connect_button.clicked.connect(self.connect_to_router)
+        self.disconnect_button.clicked.connect(self.disconnect_from_router)
+        self.create_vlan_button.clicked.connect(self.create_vlan_interface)
+        self.configure_access_button.clicked.connect(self.configure_access_port)
+        self.configure_trunk_button.clicked.connect(self.configure_trunk_port)
 
-        # Przejście do strony logowania
-        self.stacked_widget.setCurrentIndex(2)
+    def log(self, message):
+        self.log_output.append(message)
 
-    def login_to_router(self):
+    def connect_to_router(self):
+        ip = self.ip_input.text()
         username = self.username_input.text()
         password = self.password_input.text()
 
-        if not username or not password:
-            QMessageBox.warning(self, 'Błąd', 'Proszę wprowadzić nazwę użytkownika i hasło.')
-            return
-
-        router_ip = self.selected_device['ip']
-        self.router = OpenWrtRouter(ip=router_ip, username=username, password=password)
-
+        self.router = EdgeRouter(ip=ip, username=username, password=password)
         if self.router.connect():
-            QMessageBox.information(self, 'Sukces', f'Zalogowano do routera {router_ip}.')
-            # Przejście do strony konfiguracji
-            self.stacked_widget.setCurrentIndex(3)
+            self.log(f"Połączono z routerem {ip}.")
+            self.connect_button.setEnabled(False)
+            self.disconnect_button.setEnabled(True)
+            self.create_vlan_button.setEnabled(True)
+            self.configure_access_button.setEnabled(True)
+            self.configure_trunk_button.setEnabled(True)
         else:
-            QMessageBox.critical(self, 'Błąd', f'Nie udało się zalogować do routera {router_ip}.')
+            QMessageBox.critical(self, "Błąd", "Nie udało się połączyć z routerem.")
+            self.router = None
 
-    def apply_new_ip(self):
-        new_ip = self.ip_input.text()
-        if not new_ip:
-            QMessageBox.warning(self, 'Błąd', 'Proszę wprowadzić nowy adres IP.')
+    def disconnect_from_router(self):
+        if self.router:
+            self.router.disconnect()
+            self.log("Rozłączono z routerem.")
+            self.connect_button.setEnabled(True)
+            self.disconnect_button.setEnabled(False)
+            self.create_vlan_button.setEnabled(False)
+            self.configure_access_button.setEnabled(False)
+            self.configure_trunk_button.setEnabled(False)
+            self.router = None
+
+    def create_vlan_interface(self):
+        vlan_id = self.vlan_id_input.text()
+        parent_interface = self.parent_interface_input.text()
+        vlan_address = self.vlan_address_input.text()
+        vlan_description = self.vlan_description_input.text()
+
+        if not vlan_id.isdigit():
+            QMessageBox.warning(self, "Błąd", "VLAN ID musi być liczbą całkowitą.")
             return
 
-        if self.router:
-            if self.router.change_ip(new_ip):
-                QMessageBox.information(self, 'Sukces', f'Adres IP został zmieniony na {new_ip}.')
-            else:
-                QMessageBox.critical(self, 'Błąd', 'Nie udało się zmienić adresu IP.')
+        if self.router.create_vlan_interface(parent_interface, vlan_id, address=vlan_address, description=vlan_description):
+            self.log(f"Utworzono interfejs VLAN {vlan_id} na {parent_interface}.")
         else:
-            QMessageBox.critical(self, 'Błąd', 'Brak połączenia z routerem.')
+            QMessageBox.critical(self, "Błąd", "Nie udało się utworzyć interfejsu VLAN.")
 
-    def backup_configuration(self):
-        if self.router:
-            if self.router.backup_configuration():
-                QMessageBox.information(self, 'Sukces', 'Kopia zapasowa została utworzona.')
-            else:
-                QMessageBox.critical(self, 'Błąd', 'Nie udało się utworzyć kopii zapasowej.')
+    def configure_access_port(self):
+        interface_name = self.access_interface_input.text()
+        vlan_id = self.access_vlan_id_input.text()
+
+        if not vlan_id.isdigit():
+            QMessageBox.warning(self, "Błąd", "VLAN ID musi być liczbą całkowitą.")
+            return
+
+        if self.router.configure_access_port(interface_name, vlan_id):
+            self.log(f"Skonfigurowano {interface_name} jako port dostępu dla VLAN {vlan_id}.")
         else:
-            QMessageBox.critical(self, 'Błąd', 'Brak połączenia z routerem.')
+            QMessageBox.critical(self, "Błąd", "Nie udało się skonfigurować portu dostępu.")
 
-    def exit_application(self):
-        # Rozłączamy się z routerem, jeśli połączenie istnieje
-        if hasattr(self, 'router') and self.router:
-            self.router.disconnect()
-        # Zamykamy aplikację
-        self.close()
+    def configure_trunk_port(self):
+        interface_name = self.trunk_interface_input.text()
+        vlan_list = self.allowed_vlans_input.text()
 
-    def closeEvent(self, event):
-        # Nadpisujemy metodę zamykającą okno, aby upewnić się, że połączenie jest zamknięte
-        if hasattr(self, 'router') and self.router:
-            self.router.disconnect()
-        event.accept()
+        try:
+            allowed_vlans = [int(v.strip()) for v in vlan_list.split(',') if v.strip().isdigit()]
+        except ValueError:
+            QMessageBox.warning(self, "Błąd", "Lista VLAN-ów musi zawierać liczby całkowite, oddzielone przecinkami.")
+            return
+
+        if not allowed_vlans:
+            QMessageBox.warning(self, "Błąd", "Musisz podać przynajmniej jeden VLAN ID.")
+            return
+
+        if self.router.configure_trunk_port(interface_name, allowed_vlans):
+            vlan_str = ', '.join(map(str, allowed_vlans))
+            self.log(f"Skonfigurowano {interface_name} jako port trunk dla VLAN-ów {vlan_str}.")
+        else:
+            QMessageBox.critical(self, "Błąd", "Nie udało się skonfigurować portu trunk.")
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    ex = RouterConfigurator()
+    gui = EdgeRouterGUI()
+    gui.show()
     sys.exit(app.exec())

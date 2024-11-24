@@ -1,41 +1,80 @@
 # router_base.py
+
 from abc import ABC, abstractmethod
-import paramiko
 
 class RouterBase(ABC):
+    """
+    Abstrakcyjna klasa bazowa dla routerów.
+    Definiuje interfejs, który muszą implementować wszystkie klasy routerów.
+    """
+
     def __init__(self, ip, username, password, port=22):
+        """
+        Inicjalizuje router z parametrami połączenia.
+        """
         self.ip = ip
         self.username = username
         self.password = password
         self.port = port
-        self.client = None  # Obiekt SSHClient
-
-    def connect(self):
-        try:
-            print(f"Łączenie z urządzeniem {self.ip}...")
-            self.client = paramiko.SSHClient()
-            self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            self.client.connect(
-                hostname=self.ip,
-                port=self.port,
-                username=self.username,
-                password=self.password,
-                look_for_keys=False,
-                allow_agent=False
-            )
-            print("Połączono z urządzeniem.")
-            return True
-        except Exception as e:
-            print(f"Wystąpił błąd podczas łączenia: {e}")
-            return False
-
-    def disconnect(self):
-        if self.client is not None:
-            self.client.close()
-            self.client = None
-            print("Rozłączono z urządzeniem.")
+        self.client = None  # Obiekt klienta SSH lub innego protokołu
 
     @abstractmethod
-    def change_ip(self, new_ip):
-        pass  # Metoda abstrakcyjna, musi być zaimplementowana w klasach potomnych
+    def connect(self):
+        """
+        Nawiązuje połączenie z routerem.
+        """
+        pass
 
+    @abstractmethod
+    def disconnect(self):
+        """
+        Zamyka połączenie z routerem.
+        """
+        pass
+
+    @abstractmethod
+    def get_basic_info(self):
+        """
+        Pobiera podstawowe informacje o routerze, takie jak:
+        - Wszystkie adresy IP interfejsów
+        - Ustawienia DNS
+        - Brama domyślna
+        Zwraca słownik z informacjami.
+        """
+        pass
+
+    @abstractmethod
+    def reconnect(self, new_ip=None):
+        """
+        Ponownie łączy się z routerem.
+        Jeśli podano `new_ip`, aktualizuje adres IP przed próbą połączenia.
+        """
+        pass
+
+    @abstractmethod
+    def change_ip(self, interface_name, new_ip, netmask):
+        """
+        Zmienia adres IP na podanym interfejsie.
+        """
+        pass
+
+    @abstractmethod
+    def change_dns(self, new_dns):
+        """
+        Zmienia ustawienia DNS routera.
+        """
+        pass
+
+    @abstractmethod
+    def change_gateway(self, new_gateway):
+        """
+        Zmienia bramę domyślną routera.
+        """
+        pass
+
+    @abstractmethod
+    def disable_dhcp(self):
+        """
+        Wyłącza serwer DHCP na routerze.
+        """
+        pass
