@@ -12,7 +12,7 @@ formularz do logowania się do routera
 
 ![4](https://github.com/user-attachments/assets/24ff21c3-f66b-4486-9235-91e8fa97b6b5)
 
-Przyciski:
+Przyciski: 
 Zastosuj - Zmienia Adres IP
 Backup - Tworzy plik z konfiguracją
 Wyjdź - wychodzi z aplikacji
