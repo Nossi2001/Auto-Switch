@@ -16,7 +16,8 @@ class EdgeRouter(RouterBase):
         super().__init__(ip, username, password, port)
         self.client = None
         self.default_netmask = default_netmask
-
+    def print_basic_info(self):
+        pass
     def connect(self):
         """
         Nawiązuje połączenie SSH z routerem.
@@ -48,48 +49,77 @@ class EdgeRouter(RouterBase):
             self.client = None
             print("Rozłączono z urządzeniem.")
 
-    def get_basic_info(self):
-        """
-        Pobiera podstawowe informacje o routerze:
-        - Adresy IP interfejsów
-        - Ustawienia DNS
-        - Brama domyślna
-        """
-        if not self.client:
-            print("Brak połączenia z urządzeniem.")
-            return None
+    def get_interfaces(self):
         try:
-            info = {}
+            if not self.client:
+                print("Brak połączenia z routerem.")
+                return None
 
-            # Pobieranie informacji o interfejsach
-            cmd_interfaces = '/opt/vyatta/bin/vyatta-op-cmd-wrapper show interfaces'
-            stdin, stdout, stderr = self.client.exec_command(cmd_interfaces)
-            interfaces_output = stdout.read().decode()
-            info['interfaces'] = interfaces_output
+            shell = self.client.invoke_shell()
+            shell.send("show configuration commands | match interfaces | match switch | match eth \n")
 
-            # Pobieranie ustawień DNS (system name-server)
-            cmd_dns_system = '/opt/vyatta/bin/vyatta-op-cmd-wrapper show system name-server'
-            stdin, stdout, stderr = self.client.exec_command(cmd_dns_system)
-            dns_system_output = stdout.read().decode().strip()
+            output = ""
+            while True:
+                if shell.recv_ready():
+                    chunk = shell.recv(4096).decode('utf-8')
+                    output += chunk
 
-            # Pobieranie ustawień DNS (service dns forwarding name-server)
-            stdin, stdout, stderr = self.client.exec_command('cat /etc/resolv.conf')
-            dns_system_output = stdout.read().decode().strip()
+                    if output.strip().endswith("$") or output.strip().endswith("#"):
+                        break
 
-            # Sprawdzenie, które polecenie zwróciło dane
-            if dns_system_output:
-                info['dns'] = dns_system_output
-            else:
-                info['dns'] = "Brak skonfigurowanych serwerów DNS."
+            vlan_capable_interfaces = []
+            lines = output.split("\n")
+            for line in lines:
+                words = line.split()
+                print(words)
 
-            # Pobieranie bramy domyślnej
-            stdin, stdout, stderr = self.client.exec_command('ip route | grep default')
-            gateway_output = stdout.read().decode()
-            info['gateway'] = gateway_output
 
-            return info
+            shell.close()
+            return output
         except Exception as e:
-            print(f"Błąd podczas pobierania informacji: {e}")
+            print(f"Błąd podczas pobierania interfejsów VLAN: {e}")
+            return None
+
+    def get_dns(self):
+        """
+        Pobiera skonfigurowane serwery DNS na routerze.
+        Zwraca listę serwerów DNS.
+        """
+        try:
+            command = "show service dns forwarding"
+            stdin, stdout, stderr = self.client.exec_command(command)
+            output = stdout.read().decode().strip()
+
+            dns_servers = []
+            for line in output.splitlines():
+                if "name-server" in line:
+                    dns_servers.append(line.split("name-server ")[-1].strip())
+
+            return dns_servers
+
+        except Exception as e:
+            print(f"Błąd podczas pobierania serwerów DNS: {e}")
+            return []
+
+    def get_gateway(self):
+        """
+        Pobiera skonfigurowaną bramę domyślną na routerze.
+        Zwraca adres IP bramy domyślnej lub None, jeśli brak.
+        """
+        try:
+            command = "show ip route"
+            stdin, stdout, stderr = self.client.exec_command(command)
+            output = stdout.read().decode().strip()
+
+            for line in output.splitlines():
+                if "default via" in line:
+                    gateway = line.split("default via ")[-1].split()[0]
+                    return gateway
+
+            return None
+
+        except Exception as e:
+            print(f"Błąd podczas pobierania bramy domyślnej: {e}")
             return None
 
     def get_management_interface(self):
@@ -402,6 +432,34 @@ class EdgeRouter(RouterBase):
             print(f"Błąd podczas zmiany stanu interfejsu: {e}")
             return False
 
+    def tmp_vlan(self,parent_interface, vlan_id, address, description=None):
+        if not self.client:
+            print("Brak połączenia z urządzeniem.")
+            return False
+        try:
+            commands = [
+                '/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper begin',
+                f'/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper set interfaces ethernet {parent_interface} vif {vlan_id} address "{address}"'
+
+            ]
+            if description:
+                commands.append(
+                    f'/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper set interfaces ethernet {parent_interface} description "{description}"')
+            commands.extend([
+                '/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper commit',
+                '/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper save',
+                '/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper end'
+                            ])
+            for cmd in commands:
+                stdin, stdout, stderr = self.client.exec_command(cmd)
+                exit_status = stdout.channel.recv_exit_status()
+                error = stderr.read().decode().strip()
+                if exit_status != 0:
+                    print(f"Błąd podczas wykonywania '{cmd}': {error}")
+                    return False
+        except Exception as e:
+            print(f"Błąd podczas ustawiania opisu interfejsu: {e}")
+            return False
     def set_interface_description(self, interface_name, description):
         """
         Ustawia opis interfejsu.
@@ -533,7 +591,7 @@ class EdgeRouter(RouterBase):
             print(f"Błąd podczas tworzenia kopii zapasowej: {e}")
             return False
 
-    def create_vlan_interface(self, parent_interface, vlan_id, address=None, description=None):
+    def create_vlan_interface(self, parent_interface, vlan_id, address, description=None):
         """
         Tworzy podinterfejs VLAN na podanym interfejsie fizycznym.
 
@@ -553,14 +611,13 @@ class EdgeRouter(RouterBase):
             ]
             if address:
                 commands.append(
-                    f'/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper set interfaces ethernet {vlan_interface} address {address}')
+                    f'/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper set interfaces ethernet {vlan_interface} vif {vlan_id} address {address}/{self.default_netmask}')
             if description:
                 commands.append(
                     f'/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper set interfaces ethernet {vlan_interface} description "{description}"')
             commands.extend([
                 '/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper commit',
-                '/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper save',
-                '/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper end'
+                '/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper save'
             ])
 
             full_cmd = '; '.join(commands)

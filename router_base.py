@@ -33,7 +33,7 @@ class RouterBase(ABC):
         pass
 
     @abstractmethod
-    def get_basic_info(self):
+    def print_basic_info(self):
         """
         Pobiera podstawowe informacje o routerze, takie jak:
         - Wszystkie adresy IP interfejsów

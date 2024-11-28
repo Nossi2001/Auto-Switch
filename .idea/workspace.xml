@@ -4,12 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="62ecc583-8d63-460b-8300-b577ccda17fa" name="Changes" comment="Dodanie opcji do konfiguracji(bez dostosowania maina oraz gui):&#10;-Interfejsy sieciowe&#10;- VLAN">
-      <change afterPath="$PROJECT_DIR$/edge_router.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tmp/Lab_1_Krypto_2024_gr_L2_Mateusz_Nosal.py" afterDir="false" />
+    <list default="true" id="62ecc583-8d63-460b-8300-b577ccda17fa" name="Changes" comment="edgeroutery:&#10;VLAN:&#10;&#10;Tworzenie i zarządzanie VLAN-ami.&#10;Przypisywanie VLAN-ów do interfejsów.&#10;Konfiguracja trunkingu.&#10;Backup i Restore Konfiguracji:&#10;&#10;Automatyczne tworzenie kopii zapasowych konfiguracji routera.&#10;Przywracanie konfiguracji z kopii zapasowej.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/edge_router.py" beforeDir="false" afterPath="$PROJECT_DIR$/edge_router.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/router_base.py" beforeDir="false" afterPath="$PROJECT_DIR$/router_base.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tmp_testowania_nowej_konfiguracji.py" beforeDir="false" afterPath="$PROJECT_DIR$/tmp_testowania_nowej_konfiguracji.py" afterDir="false" />
     </list>
@@ -273,7 +270,15 @@
       <option name="project" value="LOCAL" />
       <updated>1731634482053</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="edgeroutery:&#10;VLAN:&#10;&#10;Tworzenie i zarządzanie VLAN-ami.&#10;Przypisywanie VLAN-ów do interfejsów.&#10;Konfiguracja trunkingu.&#10;Backup i Restore Konfiguracji:&#10;&#10;Automatyczne tworzenie kopii zapasowych konfiguracji routera.&#10;Przywracanie konfiguracji z kopii zapasowej.">
+      <option name="closed" value="true" />
+      <created>1732488970669</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1732488970669</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -291,6 +296,7 @@
     <MESSAGE value="a" />
     <MESSAGE value="Dodanie brakującego pliku(Auto_Finder_Router.py)&#10;Dodanie plików(cisco_ios_router.py[obecnie jeszcze nie używanego], config.py)&#10;Przeniesienie listy producentów do cinfigu." />
     <MESSAGE value="Dodanie opcji do konfiguracji(bez dostosowania maina oraz gui):&#10;-Interfejsy sieciowe&#10;- VLAN" />
-    <option name="LAST_COMMIT_MESSAGE" value="Dodanie opcji do konfiguracji(bez dostosowania maina oraz gui):&#10;-Interfejsy sieciowe&#10;- VLAN" />
+    <MESSAGE value="edgeroutery:&#10;VLAN:&#10;&#10;Tworzenie i zarządzanie VLAN-ami.&#10;Przypisywanie VLAN-ów do interfejsów.&#10;Konfiguracja trunkingu.&#10;Backup i Restore Konfiguracji:&#10;&#10;Automatyczne tworzenie kopii zapasowych konfiguracji routera.&#10;Przywracanie konfiguracji z kopii zapasowej." />
+    <option name="LAST_COMMIT_MESSAGE" value="edgeroutery:&#10;VLAN:&#10;&#10;Tworzenie i zarządzanie VLAN-ami.&#10;Przypisywanie VLAN-ów do interfejsów.&#10;Konfiguracja trunkingu.&#10;Backup i Restore Konfiguracji:&#10;&#10;Automatyczne tworzenie kopii zapasowych konfiguracji routera.&#10;Przywracanie konfiguracji z kopii zapasowej." />
   </component>
 </project>
