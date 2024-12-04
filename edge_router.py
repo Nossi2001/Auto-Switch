@@ -432,34 +432,6 @@ class EdgeRouter(RouterBase):
             print(f"Błąd podczas zmiany stanu interfejsu: {e}")
             return False
 
-    def tmp_vlan(self,parent_interface, vlan_id, address, description=None):
-        if not self.client:
-            print("Brak połączenia z urządzeniem.")
-            return False
-        try:
-            commands = [
-                '/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper begin',
-                f'/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper set interfaces ethernet {parent_interface} vif {vlan_id} address "{address}"'
-
-            ]
-            if description:
-                commands.append(
-                    f'/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper set interfaces ethernet {parent_interface} description "{description}"')
-            commands.extend([
-                '/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper commit',
-                '/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper save',
-                '/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper end'
-                            ])
-            for cmd in commands:
-                stdin, stdout, stderr = self.client.exec_command(cmd)
-                exit_status = stdout.channel.recv_exit_status()
-                error = stderr.read().decode().strip()
-                if exit_status != 0:
-                    print(f"Błąd podczas wykonywania '{cmd}': {error}")
-                    return False
-        except Exception as e:
-            print(f"Błąd podczas ustawiania opisu interfejsu: {e}")
-            return False
     def set_interface_description(self, interface_name, description):
         """
         Ustawia opis interfejsu.
@@ -592,72 +564,33 @@ class EdgeRouter(RouterBase):
             return False
 
     def create_vlan_interface(self, parent_interface, vlan_id, address, description=None):
-        """
-        Tworzy podinterfejs VLAN na podanym interfejsie fizycznym.
-
-        :param parent_interface: Fizyczny interfejs, do którego zostanie dodany VLAN (np. 'eth1')
-        :param vlan_id: ID VLAN-u (np. 100)
-        :param address: Opcjonalny adres IP do przypisania do interfejsu VLAN (np. '192.168.100.1/24')
-        :param description: Opcjonalny opis dla interfejsu VLAN
-        """
-        if not self.client or not self.client.get_transport() or not self.client.get_transport().is_active():
-            print("Brak aktywnego połączenia z urządzeniem.")
+        if not self.client:
+            print("Brak połączenia z urządzeniem.")
             return False
         try:
-            vlan_interface = f"{parent_interface}.{vlan_id}"
             commands = [
                 '/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper begin',
-                f'/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper set interfaces ethernet {vlan_interface}'
+                f'/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper set interfaces ethernet {parent_interface} vif {vlan_id} address "{address}"',
+                f'/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper set interfaces switch {parent_interface} vif {vlan_id} address "{address}"'
+
             ]
-            if address:
-                commands.append(
-                    f'/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper set interfaces ethernet {vlan_interface} vif {vlan_id} address {address}/{self.default_netmask}')
             if description:
                 commands.append(
-                    f'/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper set interfaces ethernet {vlan_interface} description "{description}"')
+                    f'/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper set interfaces ethernet {parent_interface} description "{description}"')
             commands.extend([
-                '/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper commit',
-                '/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper save'
-            ])
-
-            full_cmd = '; '.join(commands)
-            stdin, stdout, stderr = self.client.exec_command(full_cmd)
-            # Opcjonalnie możesz sprawdzić wyjście lub błędy
-
-            print(f"Utworzono interfejs VLAN: {vlan_interface}")
-            return True
-        except Exception as e:
-            print(f"Błąd podczas tworzenia interfejsu VLAN: {e}")
-            return False
-
-    def delete_vlan_interface(self, parent_interface, vlan_id):
-        """
-        Usuwa podinterfejs VLAN z podanego interfejsu fizycznego.
-
-        :param parent_interface: Fizyczny interfejs, z którego zostanie usunięty VLAN (np. 'eth1')
-        :param vlan_id: ID VLAN-u do usunięcia (np. 100)
-        """
-        if not self.client or not self.client.get_transport() or not self.client.get_transport().is_active():
-            print("Brak aktywnego połączenia z urządzeniem.")
-            return False
-        try:
-            vlan_interface = f"{parent_interface}.{vlan_id}"
-            commands = [
-                '/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper begin',
-                f'/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper delete interfaces ethernet {vlan_interface}',
                 '/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper commit',
                 '/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper save',
                 '/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper end'
-            ]
+                            ])
+            for cmd in commands:
+                stdin, stdout, stderr = self.client.exec_command(cmd)
+                exit_status = stdout.channel.recv_exit_status()
+                error = stderr.read().decode().strip()
+                if exit_status != 0:
+                    print(f"Błąd podczas wykonywania '{cmd}': {error}")
 
-            full_cmd = '; '.join(commands)
-            stdin, stdout, stderr = self.client.exec_command(full_cmd)
-            # Opcjonalnie możesz sprawdzić wyjście lub błędy
-
-            print(f"Usunięto interfejs VLAN: {vlan_interface}")
-            return True
         except Exception as e:
-            print(f"Błąd podczas usuwania interfejsu VLAN: {e}")
+            print(f"Błąd podczas ustawiania opisu interfejsu: {e}")
             return False
 
     def delete_vlan_interface(self, parent_interface, vlan_id):

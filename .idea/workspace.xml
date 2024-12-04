@@ -4,10 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="62ecc583-8d63-460b-8300-b577ccda17fa" name="Changes" comment="edgeroutery:&#10;VLAN:&#10;&#10;Tworzenie i zarządzanie VLAN-ami.&#10;Przypisywanie VLAN-ów do interfejsów.&#10;Konfiguracja trunkingu.&#10;Backup i Restore Konfiguracji:&#10;&#10;Automatyczne tworzenie kopii zapasowych konfiguracji routera.&#10;Przywracanie konfiguracji z kopii zapasowej.">
+    <list default="true" id="62ecc583-8d63-460b-8300-b577ccda17fa" name="Changes" comment="lepszy main">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Auto_Finder_Router.py" beforeDir="false" afterPath="$PROJECT_DIR$/Auto_Finder_Router.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/a.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/edge_router.py" beforeDir="false" afterPath="$PROJECT_DIR$/edge_router.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/router_base.py" beforeDir="false" afterPath="$PROJECT_DIR$/router_base.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp/Lab_1_Krypto_2024_gr_L2_Mateusz_Nosal.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/tmp_testowania_nowej_konfiguracji.py" beforeDir="false" afterPath="$PROJECT_DIR$/tmp_testowania_nowej_konfiguracji.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -36,24 +40,30 @@
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
+    &quot;Python.Auto_Finder_Router.executor&quot;: &quot;Run&quot;,
     &quot;Python.L2_zad-1_Krypto_2024.executor&quot;: &quot;Run&quot;,
     &quot;Python.Lab_1_Krypto_2024_gr_L2_Mateusz_Nosal (1).executor&quot;: &quot;Run&quot;,
     &quot;Python.Lab_2_Krypto_2024_gr_L2_Mateusz_Nosal.executor&quot;: &quot;Run&quot;,
+    &quot;Python.Lab_3_Krypto_2024_gr_L2_Mateusz_Nosal.executor&quot;: &quot;Run&quot;,
+    &quot;Python.Lab_4_Krypto_2024_gr_L2_Mateusz_Nosal.executor&quot;: &quot;Run&quot;,
     &quot;Python.a.executor&quot;: &quot;Run&quot;,
     &quot;Python.main.executor&quot;: &quot;Run&quot;,
     &quot;Python.open_wrt_router.executor&quot;: &quot;Run&quot;,
     &quot;Python.tmp.executor&quot;: &quot;Run&quot;,
     &quot;Python.tmp1.executor&quot;: &quot;Run&quot;,
     &quot;Python.tmp2.executor&quot;: &quot;Run&quot;,
+    &quot;Python.tmp_router.executor&quot;: &quot;Run&quot;,
     &quot;Python.tmp_testowania_nowej_konfiguracji.executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Mateusz.N/PycharmProjects/Auto-Switch/tmp&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Mateusz.N/PycharmProjects/Auto-Switch/pages&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;org.jetbrains.plugins.github.ui.GithubSettingsConfigurable&quot;
   }
 }</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Mateusz.N\PycharmProjects\Auto-Switch\pages" />
+      <recent name="C:\Users\Mateusz.N\PycharmProjects\Auto-Switch\threads" />
       <recent name="C:\Users\Mateusz.N\PycharmProjects\Auto-Switch\tmp" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
@@ -61,8 +71,8 @@
       <recent name="C:\Users\Mateusz.N\PycharmProjects\Auto-Switch" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.main">
-    <configuration name="Lab_1_Krypto_2024_gr_L2_Mateusz_Nosal (1)" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="Python.tmp_testowania_nowej_konfiguracji">
+    <configuration name="Auto_Finder_Router" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Auto-Switch" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -71,11 +81,33 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tmp" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tmp/Lab_1_Krypto_2024_gr_L2_Mateusz_Nosal.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Auto_Finder_Router.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="a" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="Auto-Switch" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/a.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -98,28 +130,6 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="open_wrt_router" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="Auto-Switch" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/open_wrt_router.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -174,11 +184,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.main" />
         <item itemvalue="Python.tmp_testowania_nowej_konfiguracji" />
+        <item itemvalue="Python.main" />
+        <item itemvalue="Python.Auto_Finder_Router" />
         <item itemvalue="Python.tmp" />
-        <item itemvalue="Python.open_wrt_router" />
-        <item itemvalue="Python.Lab_1_Krypto_2024_gr_L2_Mateusz_Nosal (1)" />
+        <item itemvalue="Python.a" />
       </list>
     </recent_temporary>
   </component>
@@ -278,7 +288,15 @@
       <option name="project" value="LOCAL" />
       <updated>1732488970669</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="lepszy main">
+      <option name="closed" value="true" />
+      <created>1732819185474</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1732819185474</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -297,6 +315,7 @@
     <MESSAGE value="Dodanie brakującego pliku(Auto_Finder_Router.py)&#10;Dodanie plików(cisco_ios_router.py[obecnie jeszcze nie używanego], config.py)&#10;Przeniesienie listy producentów do cinfigu." />
     <MESSAGE value="Dodanie opcji do konfiguracji(bez dostosowania maina oraz gui):&#10;-Interfejsy sieciowe&#10;- VLAN" />
     <MESSAGE value="edgeroutery:&#10;VLAN:&#10;&#10;Tworzenie i zarządzanie VLAN-ami.&#10;Przypisywanie VLAN-ów do interfejsów.&#10;Konfiguracja trunkingu.&#10;Backup i Restore Konfiguracji:&#10;&#10;Automatyczne tworzenie kopii zapasowych konfiguracji routera.&#10;Przywracanie konfiguracji z kopii zapasowej." />
-    <option name="LAST_COMMIT_MESSAGE" value="edgeroutery:&#10;VLAN:&#10;&#10;Tworzenie i zarządzanie VLAN-ami.&#10;Przypisywanie VLAN-ów do interfejsów.&#10;Konfiguracja trunkingu.&#10;Backup i Restore Konfiguracji:&#10;&#10;Automatyczne tworzenie kopii zapasowych konfiguracji routera.&#10;Przywracanie konfiguracji z kopii zapasowej." />
+    <MESSAGE value="lepszy main" />
+    <option name="LAST_COMMIT_MESSAGE" value="lepszy main" />
   </component>
 </project>

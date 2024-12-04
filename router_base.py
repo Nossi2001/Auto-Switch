@@ -33,25 +33,6 @@ class RouterBase(ABC):
         pass
 
     @abstractmethod
-    def print_basic_info(self):
-        """
-        Pobiera podstawowe informacje o routerze, takie jak:
-        - Wszystkie adresy IP interfejsów
-        - Ustawienia DNS
-        - Brama domyślna
-        Zwraca słownik z informacjami.
-        """
-        pass
-
-    @abstractmethod
-    def reconnect(self, new_ip=None):
-        """
-        Ponownie łączy się z routerem.
-        Jeśli podano `new_ip`, aktualizuje adres IP przed próbą połączenia.
-        """
-        pass
-
-    @abstractmethod
     def change_ip(self, interface_name, new_ip, netmask):
         """
         Zmienia adres IP na podanym interfejsie.
