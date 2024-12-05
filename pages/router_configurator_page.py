@@ -290,6 +290,23 @@ class RouterConfiguratorPage(QtWidgets.QWidget):
         templates_layout = QtWidgets.QVBoxLayout()
         templates_group.setLayout(templates_layout)
 
+        # Ustawienie stylu dla QGroupBox (szablonów)
+        templates_group.setStyleSheet("""
+            QGroupBox {
+                border: 1px solid #9E9E9E;
+                margin-top: 20px;
+                background-color: #3C3C3C;
+                border-radius: 5px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                subcontrol-position: top center;
+                padding: 0 3px;
+                color: #FFFFFF;
+                font-weight: bold;
+            }
+        """)
+
         # Lista dostępnych szablonów
         self.templates = [
             "dhcp_server: Configure the router as a DHCP server.",
@@ -303,17 +320,47 @@ class RouterConfiguratorPage(QtWidgets.QWidget):
         template_names = [template.split(":")[0] for template in self.templates]
         self.template_combo.addItems(template_names)
         self.template_combo.currentIndexChanged.connect(self.on_template_changed)
-        templates_layout.addWidget(self.template_combo,stretch=1)
+
+        # Stylowanie ComboBox
+        self.template_combo.setStyleSheet("""
+            QComboBox {
+                background-color: #5F5F5F;
+                border: 1px solid #9E9E9E;
+                color: #FFFFFF;
+                border-radius: 5px;
+                padding: 5px;
+            }
+            QComboBox:hover {
+                border-color: #4CAF50;
+            }
+            QComboBox:focus {
+                border: 1px solid #4CAF50;
+            }
+        """)
+
+        templates_layout.addWidget(self.template_combo, stretch=1)
 
         # Etykieta wyświetlająca opis szablonu bezpośrednio pod dropdownem
         self.template_description = QtWidgets.QLabel()
         self.template_description.setWordWrap(True)
+        self.template_description.setStyleSheet("color: #FFFFFF;")  # Ustawienie koloru dla etykiety opisu
         templates_layout.addWidget(self.template_description, stretch=1)
 
         # Dynamiczne pola wejściowe na podstawie wybranego szablonu
         self.dynamic_input_group = QtWidgets.QGroupBox("Configuration Parameters")
         self.dynamic_input_layout = QtWidgets.QFormLayout()
         self.dynamic_input_group.setLayout(self.dynamic_input_layout)
+
+        # Stylowanie dla dynamicznych inputów
+        self.dynamic_input_group.setStyleSheet("""
+            QGroupBox {
+                background-color: #3C3C3C;
+                border: 1px solid #9E9E9E;
+                border-radius: 5px;
+                color: #FFFFFF;
+            }
+        """)
+
         templates_layout.addWidget(self.dynamic_input_group, stretch=8)
 
         self.main_layout.addWidget(templates_group, stretch=11)  # Pozostałe 55% zakładając total stretch=20
