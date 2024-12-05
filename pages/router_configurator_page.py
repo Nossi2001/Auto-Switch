@@ -1,5 +1,3 @@
-# pages/router_configurator_page.py
-
 import re
 from collections import Counter
 from PyQt6 import QtWidgets, QtCore
@@ -132,6 +130,7 @@ class RouterConfiguratorPage(QtWidgets.QWidget):
 
         # Section 3: Apply Button
         apply_button = QtWidgets.QPushButton("Apply Configuration")
+        apply_button.setStyleSheet("background-color: #4CAF50; color: white; padding: 15px; font-size: 18px; border-radius: 5px; margin-top: 20px;")
         apply_button.clicked.connect(self.apply_configuration)
         self.main_layout.addWidget(apply_button)
 
@@ -256,122 +255,136 @@ class RouterConfiguratorPage(QtWidgets.QWidget):
         self.template_description.setText(description)
 
         # Clear existing inputs
-        self.clear_layout(self.dynamic_input_layout)
+        for i in reversed(range(self.dynamic_input_layout.count())):
+            widget = self.dynamic_input_layout.itemAt(i).widget()
+            if widget:
+                widget.deleteLater()
 
-        # Create inputs based on the selected template
-        selected_template = self.templates[index].split(":")[0]
+        # Add relevant input fields based on the selected template
+        if index == 0:  # dhcp_server
+            self.add_input_field("IP Address", "192.168.1.1")
+            self.add_input_field("Subnet Mask", "255.255.255.0")
+        elif index == 1:  # lan_dhcp
+            self.add_input_field("DHCP Range Start", "192.168.1.100")
+            self.add_input_field("DHCP Range End", "192.168.1.200")
+        elif index == 2:  # data_configuration_without_bridge
+            self.add_input_field("Data IP Address", "10.0.0.1")
+            self.add_input_field("Gateway", "10.0.0.254")
 
-        if selected_template == "dhcp_server":
-            self.name_server_input = QtWidgets.QLineEdit()
-            self.name_server_input.setPlaceholderText("Name Server (e.g., 8.8.8.8)")
-            self.dynamic_input_layout.addRow("Name Server:", self.name_server_input)
-
-            self.gateway_input = QtWidgets.QLineEdit()
-            self.gateway_input.setPlaceholderText("Gateway (e.g., 192.168.1.1)")
-            self.dynamic_input_layout.addRow("Gateway:", self.gateway_input)
-
-            self.netmask_input = QtWidgets.QLineEdit()
-            self.netmask_input.setPlaceholderText("Netmask (e.g., 255.255.255.0)")
-            self.dynamic_input_layout.addRow("Netmask:", self.netmask_input)
-
-            self.dhcp_range_input = QtWidgets.QLineEdit()
-            self.dhcp_range_input.setPlaceholderText("DHCP Range (e.g., 192.168.1.100 192.168.1.200)")
-            self.dynamic_input_layout.addRow("DHCP Range Start and Stop:", self.dhcp_range_input)
-
-        elif selected_template == "lan_dhcp":
-            # Informational label
-            info_label = QtWidgets.QLabel("LAN DHCP configuration will be applied to the selected ports.")
-            info_label.setWordWrap(True)
-            self.dynamic_input_layout.addRow(info_label)
-
-        elif selected_template == "data_configuration_without_bridge":
-            # Informational label
-            info_label = QtWidgets.QLabel("Data configuration without bridge will be applied to the selected ports.")
-            info_label.setWordWrap(True)
-            self.dynamic_input_layout.addRow(info_label)
+    def add_input_field(self, label, default_value):
+        """
+        Adds a labeled input field to the dynamic configuration section.
+        """
+        input_field = QtWidgets.QLineEdit()
+        input_field.setText(default_value)
+        self.dynamic_input_layout.addRow(label, input_field)
 
     def apply_configuration(self):
-        selected_template_index = self.template_combo.currentIndex()
-        selected_template = self.templates[selected_template_index].split(":")[0]
+        """
+        Applies the configuration to the router based on user selection.
+        """
+        selected_ports = [port for port, button in self.port_buttons.items() if button.isChecked()]
+        template_index = self.template_combo.currentIndex()
+        input_values = [field.text() for field in self.dynamic_input_layout.findChildren(QtWidgets.QLineEdit)]
 
-        # List of selected ports for configuration (use tooltips instead of labels)
-        selected_ports = [btn.toolTip() for btn in self.port_buttons.values() if btn.isChecked()]
-
-        # Validate template selection
-        if not selected_template:
-            QtWidgets.QMessageBox.warning(self, "Error", "No configuration template selected.")
-            return
-
-        # Validate port selection
-        if not selected_ports:
-            QtWidgets.QMessageBox.warning(self, "No Ports Selected", "No ports selected for configuration.")
-            return
-
-        # Get dynamic inputs based on the selected template
-        config_params = {}
-        if selected_template == "dhcp_server":
-            name_server = self.name_server_input.text()
-            gateway = self.gateway_input.text()
-            netmask = self.netmask_input.text()
-            dhcp_range = self.dhcp_range_input.text()
-
-            if not name_server or not gateway or not netmask or not dhcp_range:
-                QtWidgets.QMessageBox.warning(self, "Error", "All fields are required for DHCP Server configuration.")
-                return
-
-            # Split dhcp_range_start and dhcp_range_stop
-            try:
-                dhcp_range_start, dhcp_range_stop = dhcp_range.split()
-            except ValueError:
-                QtWidgets.QMessageBox.warning(self, "Error", "DHCP Range must contain two addresses separated by a space.")
-                return
-
-            config_params = {
-                "name_server": name_server,
-                "gateway": gateway,
-                "netmask": netmask,
-                "dhcp_range_start": dhcp_range_start,
-                "dhcp_range_stop": dhcp_range_stop
-            }
-
-        elif selected_template == "lan_dhcp":
-            # No additional parameters required
-            config_params = {
-                "ports": selected_ports
-            }
-
-        elif selected_template == "data_configuration_without_bridge":
-            # No additional parameters required
-            config_params = {
-                "ports": selected_ports
-            }
-
-        # Disable the interface
-        self.setEnabled(False)
-
-        # Start configuration in a separate thread
-        self.configuration_thread = ConfigurationThread(
-            self.router,
-            selected_template,
-            selected_ports,
-            config_params  # Pass additional parameters
+        # Perform the necessary configuration logic
+        configuration_thread = ConfigurationThread(
+            self.router, selected_ports, template_index, input_values
         )
-        self.configuration_thread.configuration_result.connect(self.on_configuration_result)
-        self.configuration_thread.start()
+        configuration_thread.configuration_result.connect(self.on_configuration_result)
+        configuration_thread.start()
 
-    def on_configuration_result(self, success, message):
-        # Re-enable the interface
-        self.setEnabled(True)
-
+    def on_configuration_result(self, success, error_message):
         if success:
-            QtWidgets.QMessageBox.information(self, "Configuration", message)
+            QtWidgets.QMessageBox.information(self, "Success", "Configuration applied successfully.")
         else:
-            QtWidgets.QMessageBox.critical(self, "Error", message)
+            QtWidgets.QMessageBox.critical(self, "Error", f"Failed to apply configuration: {error_message}")
+    def setup_template_section(self):
+        """
+        Sets up the template selection section with styling.
+        """
+        templates_group = QtWidgets.QGroupBox("Configuration Templates")
+        templates_group.setStyleSheet("""
+            QGroupBox {
+                border: 1px solid #9E9E9E;
+                margin-top: 20px;
+                background-color: #3C3C3C;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                subcontrol-position: top center;
+                padding: 0 3px;
+                color: #FFFFFF;
+                font-size: 18px;
+            }
+        """)
 
-    def closeEvent(self, event):
-        """
-        Disconnects from the router when the window is closed.
-        """
-        if self.router:
-            self.router.disconnect()
-        event.accept()
+        templates_layout = QtWidgets.QVBoxLayout()
+        templates_group.setLayout(templates_layout)
+
+        # Lista dostępnych szablonów
+        self.templates = [
+            "dhcp_server: Configure the router as a DHCP server.",
+            "lan_dhcp: Configure LAN DHCP settings.",
+            "data_configuration_without_bridge: Apply data configurations without bridging."
+        ]
+
+        # ComboBox do wyboru szablonu
+        self.template_combo = QtWidgets.QComboBox()
+        self.template_combo.setStyleSheet("""
+            QComboBox {
+                background-color: #5F5F5F;
+                border: 1px solid #9E9E9E;
+                color: #FFFFFF;
+                border-radius: 5px;
+                padding: 5px;
+                font-size: 16px;
+            }
+            QComboBox:hover {
+                background-color: #6F6F6F;
+                border-color: #4CAF50;
+            }
+            QComboBox:focus {
+                border-color: #4CAF50;
+            }
+        """)
+
+        # Dodajemy tylko nazwę szablonu do ComboBox
+        template_names = [template.split(":")[0] for template in self.templates]
+        self.template_combo.addItems(template_names)
+        self.template_combo.currentIndexChanged.connect(self.on_template_changed)
+        templates_layout.addWidget(self.template_combo, stretch=1)
+
+        # Etykieta wyświetlająca opis szablonu bezpośrednio pod dropdownem
+        self.template_description = QtWidgets.QLabel()
+        self.template_description.setWordWrap(True)
+        self.template_description.setStyleSheet("""
+            QLabel {
+                color: #FFFFFF;
+                font-size: 14px;
+                margin-top: 10px;
+            }
+        """)
+        templates_layout.addWidget(self.template_description, stretch=1)
+
+        # Dynamiczne pola wejściowe na podstawie wybranego szablonu
+        self.dynamic_input_group = QtWidgets.QGroupBox("Configuration Parameters")
+        self.dynamic_input_group.setStyleSheet("""
+            QGroupBox {
+                background-color: #3C3C3C;
+                border: 1px solid #9E9E9E;
+            }
+            QGroupBox::title {
+                color: #FFFFFF;
+                font-size: 16px;
+            }
+        """)
+
+        self.dynamic_input_layout = QtWidgets.QFormLayout()
+        self.dynamic_input_group.setLayout(self.dynamic_input_layout)
+        templates_layout.addWidget(self.dynamic_input_group, stretch=8)
+
+        self.main_layout.addWidget(templates_group, stretch=11)  # Pozostałe 55% zakładając total stretch=20
+
+        # Inicjalizacja inputów dla pierwszego szablonu
+        self.on_template_changed(0)

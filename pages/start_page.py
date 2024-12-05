@@ -13,19 +13,64 @@ class StartPage(QtWidgets.QWidget):
         self.init_ui()
 
     def init_ui(self):
-        layout = QtWidgets.QVBoxLayout()
+        # Ustawienie stylów CSS
+        self.setStyleSheet("""
+            QWidget {
+                background-color: #f0f0f0;  /* Delikatne tło */
+                font-family: Arial, sans-serif;
+            }
+            QLabel {
+                font-size: 26px;
+                color: #333;
+                text-align: center;
+                padding-top: 50px;
+                font-weight: bold;
+            }
+            QPushButton {
+                background-color: #4CAF50;
+                color: white;
+                border-radius: 12px;
+                font-size: 18px;
+                padding: 20px;
+                margin: 10px;
+                transition: background-color 0.3s ease, transform 0.2s ease;
+            }
+            QPushButton:hover {
+                background-color: #45a049;
+                transform: scale(1.05);  /* Animacja powiększenia przy najechaniu */
+            }
+            QHBoxLayout {
+                justify-content: center;
+                align-items: center;
+                flex-wrap: wrap;
+            }
+        """)
+
+        # Layout główny
+        main_layout = QtWidgets.QVBoxLayout()
+
+        # Tytuł strony - tekst wyśrodkowany
+        self.title_label = QtWidgets.QLabel("Wybierz opcję")
+        self.title_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        main_layout.addWidget(self.title_label)
+
+        # Layout na przyciski (poziomo, z centrowaniem)
+        button_layout = QtWidgets.QHBoxLayout()
 
         # Przycisk "Wpisz ręcznie"
         manual_button = QtWidgets.QPushButton("Wpisz ręcznie")
         manual_button.clicked.connect(self.open_manual_login)
-        layout.addWidget(manual_button)
+        button_layout.addWidget(manual_button)
 
         # Przycisk "Znajdź urządzenia w sieci"
         auto_find_button = QtWidgets.QPushButton("Znajdź urządzenia w sieci")
         auto_find_button.clicked.connect(self.auto_find_devices)
-        layout.addWidget(auto_find_button)
+        button_layout.addWidget(auto_find_button)
 
-        self.setLayout(layout)
+        # Dodanie layoutu przycisków do głównego layoutu
+        main_layout.addLayout(button_layout)
+
+        self.setLayout(main_layout)
 
     def open_manual_login(self):
         self.stacked_widget.setCurrentIndex(1)  # Przejdź do ManualLoginPage
