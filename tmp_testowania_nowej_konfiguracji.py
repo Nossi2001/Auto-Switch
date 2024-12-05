@@ -18,7 +18,7 @@ if __name__ == "__main__":
         # print(router.get_unique_mac_addresses())
         #router.apply_data_configuration_without_bridge(['eth0', 'eth1', 'eth2', 'eth3'])
         # router.apply_lan_dhcp(['eth0', 'eth1', 'eth2', 'eth3'])
-        print(router.get_unique_phisical_interfaces_k())
+        print(router.get_dhcp_server_info())
 
     else:
         print("Nie udało się połączyć z routerem.")

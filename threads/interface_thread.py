@@ -1,9 +1,10 @@
 # threads/interface_thread.py
 
-from PyQt6 import QtCore
+from PyQt6.QtCore import QThread, pyqtSignal
 
-class InterfaceThread(QtCore.QThread):
-    interfaces_result = QtCore.pyqtSignal(bool, dict, str)  # Zmieniono list na dict
+
+class InterfaceThread(QThread):
+    interfaces_result = pyqtSignal(bool, dict, str)  # Zmieniono list na dict
 
     def __init__(self, router):
         super().__init__()

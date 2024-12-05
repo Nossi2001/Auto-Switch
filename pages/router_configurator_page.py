@@ -3,6 +3,8 @@
 import re
 from collections import Counter
 from PyQt6 import QtWidgets, QtCore
+
+from threads.DHCPInfoThread import DHCPInfoThread
 from tmp_router import tmp_router
 from threads.interface_thread import InterfaceThread
 from threads.configuration_thread import ConfigurationThread
@@ -310,7 +312,7 @@ class RouterConfiguratorPage(QtWidgets.QWidget):
         # Lista dostępnych szablonów
         self.templates = [
             "dhcp_server: Configure the router as a DHCP server.",
-            "lan_dhcp: Configure LAN DHCP settings.",
+            "dhcp: Configure DHCP port.",
             "data_configuration_without_bridge: Apply data configurations without bridging."
         ]
 
@@ -383,6 +385,7 @@ class RouterConfiguratorPage(QtWidgets.QWidget):
         selected_template = self.templates[index].split(":")[0]
 
         if selected_template == "dhcp_server":
+            # Dodanie pól do konfiguracji DHCP Server
             self.name_server_input = QtWidgets.QLineEdit()
             self.name_server_input.setPlaceholderText("Name Server (e.g., 8.8.8.8)")
             self.dynamic_input_layout.addRow("Name Server:", self.name_server_input)
@@ -392,16 +395,24 @@ class RouterConfiguratorPage(QtWidgets.QWidget):
             self.dynamic_input_layout.addRow("Gateway:", self.gateway_input)
 
             self.netmask_input = QtWidgets.QLineEdit()
-            self.netmask_input.setPlaceholderText("Netmask (e.g., 255.255.255.0)")
+            self.netmask_input.setPlaceholderText("Netmask (e.g., 24)")
             self.dynamic_input_layout.addRow("Netmask:", self.netmask_input)
 
             self.dhcp_range_input = QtWidgets.QLineEdit()
             self.dhcp_range_input.setPlaceholderText("DHCP Range (e.g., 192.168.1.100 192.168.1.200)")
             self.dynamic_input_layout.addRow("DHCP Range Start and Stop:", self.dhcp_range_input)
 
-        elif selected_template == "lan_dhcp":
+            # Dodanie sekcji z informacjami o istniejących serwerach DHCP
+            self.dhcp_info_label = QtWidgets.QLabel("Fetching DHCP server information...")
+            self.dhcp_info_label.setWordWrap(True)
+            self.dynamic_input_layout.addRow(self.dhcp_info_label)
+
+            # Uruchomienie pobierania informacji w osobnym wątku
+            self.fetch_dhcp_info()
+
+        elif selected_template == "dhcp":
             # Informacyjna etykieta
-            info_label = QtWidgets.QLabel("LAN DHCP configuration will be applied to the selected ports.")
+            info_label = QtWidgets.QLabel("DHCP configuration will be applied to the selected ports.")
             info_label.setWordWrap(True)
             self.dynamic_input_layout.addRow(info_label)
 
@@ -419,16 +430,6 @@ class RouterConfiguratorPage(QtWidgets.QWidget):
         selected_ports = [
             btn.property("interface_name") for btn in self.port_buttons.values() if btn.isChecked()
         ]
-
-        # Walidacja wyboru szablonu
-        if not selected_template:
-            QtWidgets.QMessageBox.warning(self, "Error", "No configuration template selected.")
-            return
-
-        # Walidacja wyboru portów
-        if not selected_ports:
-            QtWidgets.QMessageBox.warning(self, "No Ports Selected", "No ports selected for configuration.")
-            return
 
         # Pobranie dynamicznych inputów na podstawie wybranego szablonu
         config_params = {}
@@ -458,17 +459,12 @@ class RouterConfiguratorPage(QtWidgets.QWidget):
                 "dhcp_range_stop": dhcp_range_stop
             }
 
-        elif selected_template == "lan_dhcp":
-            # Nie wymagane dodatkowe parametry
-            config_params = {
-                "ports": selected_ports
-            }
-
-        elif selected_template == "data_configuration_without_bridge":
-            # Nie wymagane dodatkowe parametry
-            config_params = {
-                "ports": selected_ports
-            }
+        elif selected_template in ["dhcp", "data_configuration_without_bridge"]:
+            # Walidacja wyboru portów dla pozostałych szablonów
+            if not selected_ports:
+                QtWidgets.QMessageBox.warning(self, "No Ports Selected", "No ports selected for configuration.")
+                return
+            config_params["ports"] = selected_ports
 
         # Wyłączenie interfejsu
         self.setEnabled(False)
@@ -477,7 +473,6 @@ class RouterConfiguratorPage(QtWidgets.QWidget):
         self.configuration_thread = ConfigurationThread(
             self.router,
             selected_template,
-            selected_ports,
             config_params  # Przekazanie dodatkowych parametrów
         )
         self.configuration_thread.configuration_result.connect(self.on_configuration_result)
@@ -489,8 +484,53 @@ class RouterConfiguratorPage(QtWidgets.QWidget):
 
         if success:
             QtWidgets.QMessageBox.information(self, "Configuration", message)
+            self.refresh_ports()  # Odświeżenie kolorów portów
         else:
             QtWidgets.QMessageBox.critical(self, "Error", message)
+
+    def refresh_ports(self):
+        """
+        Odświeża kolory portów na podstawie aktualnych opisów.
+        """
+        try:
+            interfaces_with_description = self.router.get_unique_physical_interfaces_with_description()
+
+            if not interfaces_with_description:
+                QtWidgets.QMessageBox.warning(self, "Error", "Failed to refresh port descriptions.")
+                return
+
+            # Aktualizacja kolorów dla każdego przycisku portu
+            for port_label, port_button in self.port_buttons.items():
+                interface_name = port_button.property("interface_name")
+                if interface_name in interfaces_with_description:
+                    description = interfaces_with_description[interface_name]
+                    # Pobierz kolor z config.py lub ustaw domyślny
+                    palette = description_color.get(description, {
+                        'normal': '#5F5F5F',
+                        'hover': '#6F6F6F',
+                        'checked': '#505358'
+                    })
+                    port_button.palette = palette
+                    port_button.update_style()  # Aktualizacja stylu przycisku
+                    port_button.setToolTip(description)  # Aktualizacja tooltipa
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "Error", f"Error refreshing ports: {e}")
+
+    def fetch_dhcp_info(self):
+        """
+        Uruchamia wątek pobierający informacje o serwerach DHCP.
+        """
+        self.dhcp_info_thread = DHCPInfoThread(self.router)
+        self.dhcp_info_thread.dhcp_info_result.connect(self.on_dhcp_info_fetched)
+        self.dhcp_info_thread.start()
+
+    def on_dhcp_info_fetched(self, result):
+        """
+        Aktualizuje GUI po zakończeniu wątku pobierającego informacje o serwerach DHCP.
+        """
+        self.dhcp_info_label.setText(result)
+        self.dhcp_info_thread.quit()
+        self.dhcp_info_thread.wait()
 
     def closeEvent(self, event):
         """

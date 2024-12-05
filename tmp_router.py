@@ -14,6 +14,10 @@ class RouterBase:
         self.username = username
         self.password = password
         self.port = port
+        self.client = None
+        self._interfaces_cache = None  # Cache wyników
+        self._cache_timestamp = None  # Znacznik czasu cache
+        self._cache_ttl = 60  # Czas życia cache w sekundach
 
 class tmp_router(RouterBase):
     """
@@ -27,7 +31,7 @@ class tmp_router(RouterBase):
 
     def connect(self):
         """
-        Nawiązuje połączenie SSH z routerem.
+        Nawiązuje połączenie SSH z routerem i czyści cache.
         """
         try:
             print(f"Łączenie z urządzeniem {self.ip}...")
@@ -42,6 +46,9 @@ class tmp_router(RouterBase):
                 allow_agent=False
             )
             print("Połączono z urządzeniem.")
+            # Czyszczenie cache po nowym połączeniu
+            self._interfaces_cache = None
+            self._cache_timestamp = None
             return True
         except Exception as e:
             print(f"Błąd podczas łączenia: {e}")
@@ -72,8 +79,6 @@ class tmp_router(RouterBase):
         except Exception as e:
             print(f"Błąd podczas wykonywania komend: {e}")
             return False
-
-
 
     def get_unique_mac_addresses(self):
         """
@@ -138,32 +143,51 @@ class tmp_router(RouterBase):
         return physical_interfaces
 
     def get_unique_physical_interfaces_with_description(self):
-        keys = self.get_unique_mac_addresses()
-        processed_keys = [re.split(r'\d', key)[0] for key in keys.keys()]
-        port_counts = Counter(processed_keys)
-        if not port_counts:
+        """
+        Pobiera unikalne interfejsy fizyczne z opisami z cache, jeśli są aktualne,
+        w przeciwnym razie pobiera je z urządzenia.
+        """
+        current_time = time.time()
+
+        # Sprawdzenie, czy dane w cache są aktualne
+        if self._interfaces_cache and (current_time - self._cache_timestamp < self._cache_ttl):
+            print("Zwracanie danych z cache.")
+            return self._interfaces_cache
+
+        print("Pobieranie danych z urządzenia.")
+        try:
+            keys = self.get_unique_mac_addresses()
+            processed_keys = [re.split(r'\d', key)[0] for key in keys.keys()]
+            port_counts = Counter(processed_keys)
+
+            if not port_counts:
+                return {}
+
+            most_common_port = port_counts.most_common(1)[0][0]
+            physical_interfaces = [key.split('@')[0] for key in keys.keys() if most_common_port in key]
+            interfaces_with_description = {}
+
+            ssh_shell = self.client.invoke_shell()
+            ssh_shell.send('configure\n')
+            for port in physical_interfaces:
+                cmd = f'show interfaces ethernet {port} description\n'
+                ssh_shell.send(cmd)
+                output = self.receive_all(ssh_shell)
+                match = re.search(r'"([^"]+)"', output)
+                description = match.group(1).strip() if match else "No description"
+                interfaces_with_description[port] = description
+
+            ssh_shell.send('exit\n')
+
+            # Aktualizacja cache
+            self._interfaces_cache = interfaces_with_description
+            self._cache_timestamp = current_time
+
+            return interfaces_with_description
+
+        except Exception as e:
+            print(f"Błąd podczas pobierania interfejsów z opisem: {e}")
             return {}
-        most_common_port = port_counts.most_common(1)[0][0]
-        phisical_interfaces = [key.split('@')[0] for key in keys.keys() if most_common_port in key]
-        interfaces_with_description = {}
-
-        ssh_shell = self.client.invoke_shell()
-        cmd = 'configure'
-        ssh_shell.send(cmd + '\n')
-        for port in phisical_interfaces:
-            cmd = f'show interfaces ethernet {port} description'
-            ssh_shell.send(cmd + '\n')
-            output = self.receive_all(ssh_shell)
-            match = re.search(r'"([^"]+)"', output)
-            if match:
-                description = match.group(1).strip()
-            else:
-                description = "No description"
-
-            interfaces_with_description[port] = description
-
-        ssh_shell.send('exit\n')
-        return interfaces_with_description
 
     def receive_all(self, shell, timeout=2.5):
         output = ''
@@ -179,8 +203,6 @@ class tmp_router(RouterBase):
                     break
                 time.sleep(0.1)
         return output
-
-
 
     def apply_data_configuration_without_bridge(self, ports):
         """
@@ -218,18 +240,13 @@ class tmp_router(RouterBase):
             print(f"Błąd podczas konfiguracji: {e}")
             return False
 
-    def apply_lan_dhcp(self, ports):
+    def apply_dhcp(self, ports):
         """
-        Zastosowuje konfigurację dla szablonu "Management" na podanych portach bez użycia VLAN-u.
-
-        :param ports: Lista portów Ethernet do skonfigurowania jako porty zarządzania.
+        :param ports: Lista portów Ethernet do skonfigurowania jako porty DHCP.
         :return: True jeśli konfiguracja została zastosowana poprawnie, False w przeciwnym razie.
         """
-        print("Zastosowanie konfiguracji Management bez VLAN-u...")
         if not self.client:
-            print("Brak połączenia z urządzeniem.")
             return False
-
         try:
             commands = ["configure"]
 
@@ -240,23 +257,18 @@ class tmp_router(RouterBase):
                 commands.append(f"delete interfaces ethernet {port}")
                 commands.append("commit")
                 # Zastosowanie nowych ustawień
-                commands.append(f"set interfaces ethernet {port} description 'PORT LAN DHCP'")
+                commands.append(f"set interfaces ethernet {port} description 'PORT DHCP'")
                 commands.append(f"set interfaces ethernet {port} duplex auto")
                 commands.append(f"set interfaces ethernet {port} speed auto")
                 commands.append(f"set interfaces ethernet {port} mtu 1500")
                 commands.append(f"set interfaces ethernet {port} address dhcp")
                 commands.append("commit")
 
-
             commands.append("save")
             commands.append("exit")
 
             # Wykonanie komend
             success = self.execute_commands(commands)
-            if success:
-                print("Konfiguracja Management została zastosowana bez VLAN-u.")
-            else:
-                print("Wystąpiły błędy podczas konfiguracji Management bez VLAN-u.")
             return success
 
         except Exception as e:
@@ -282,11 +294,11 @@ class tmp_router(RouterBase):
         try:
             commands = ["configure"]
             commands.append(f"set service dhcp-server disabled false")
-            commands.append(f"set service dhcp-server shared-network-name LAN1 authoritative enable")
-            commands.append(f"set service dhcp-server shared-network-name LAN1 subnet 192.168.55.0/24 default-router 192.168.55.1")
-            commands.append(f"set service dhcp-server shared-network-name LAN1 subnet 192.168.55.0/24 dns-server 8.8.8.8")
-            commands.append(f"set service dhcp-server shared-network-name LAN1 subnet 192.168.55.0/24 lease 86400")
-            commands.append(f"set service dhcp-server shared-network-name LAN1 subnet 192.168.55.0/24 start 192.168.55.60 stop 192.168.55.70")
+            commands.append(f"set service dhcp-server shared-network-name {name_server} authoritative enable")
+            commands.append(f"set service dhcp-server shared-network-name {name_server} subnet {gateway}/{netmask} default-router {gateway}")
+            commands.append(f"set service dhcp-server shared-network-name {name_server} subnet {gateway}/{netmask} dns-server 8.8.8.8")
+            commands.append(f"set service dhcp-server shared-network-name {name_server} subnet {gateway}/{netmask} lease 86400")
+            commands.append(f"set service dhcp-server shared-network-name {name_server} subnet {gateway}/{netmask} start {dhcp_range_start} stop {dhcp_range_stop}")
             commands.append("commit")
             commands.append("save")
             commands.append("exit")
@@ -303,7 +315,51 @@ class tmp_router(RouterBase):
             print(f"Błąd podczas tworzeni serwera DHCP: {e}")
             return False
 
+    def get_dhcp_server_info(self):
+        """
+        Pobiera informacje o wszystkich serwerach DHCP, w tym ich nazwę i zakres adresów IP.
 
+        :return: Lista słowników z nazwami serwerów DHCP i zakresami adresów IP
+                 [{'server_name': 'DHCP_Server1', 'range': '192.168.1.100-192.168.1.200'},
+                  {'server_name': 'DHCP_Server2', 'range': '10.0.0.50-10.0.0.100'}]
+                 lub None w przypadku błędu.
+        """
+        try:
+            ssh_shell = self.client.invoke_shell()
+            cmd = 'configure'
+            ssh_shell.send(cmd + '\n')
+            cmd = "show service dhcp-server"
+            ssh_shell.send(cmd + '\n')
+            output = self.receive_all(ssh_shell)
+
+            # Debug: Wypisz pełne wyjście
+            print(output)
+
+            # Parsowanie wszystkich nazw serwerów DHCP
+            server_names = re.findall(r"shared-network-name\s+(\S+)", output)
+
+            # Parsowanie wszystkich zakresów DHCP
+            range_starts = re.findall(r"start\s+(\d+\.\d+\.\d+\.\d+)", output)
+            range_stops = re.findall(r"stop\s+(\d+\.\d+\.\d+\.\d+)", output)
+
+            # Upewnij się, że liczba nazw i zakresów jest spójna
+            if len(server_names) != len(range_starts) or len(range_starts) != len(range_stops):
+                print("Nieprawidłowy format danych DHCP w wyjściu.")
+                return None
+
+            # Tworzenie listy słowników
+            dhcp_servers = []
+            for i in range(len(server_names)):
+                dhcp_servers.append({
+                    "server_name": server_names[i],
+                    "range": f"{range_starts[i]}-{range_stops[i]}"
+                })
+
+            return dhcp_servers
+
+        except Exception as e:
+            print(f"Błąd podczas pobierania informacji o serwerze DHCP: {e}")
+            return None
 
 
 
