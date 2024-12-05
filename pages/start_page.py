@@ -16,7 +16,6 @@ class StartPage(QtWidgets.QWidget):
         # Ustawienie stylów CSS
         self.setStyleSheet("""
             QWidget {
-                background-color: #f0f0f0;  /* Delikatne tło */
                 font-family: Arial, sans-serif;
             }
             QLabel {
