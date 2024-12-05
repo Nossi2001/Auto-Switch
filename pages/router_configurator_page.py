@@ -303,18 +303,18 @@ class RouterConfiguratorPage(QtWidgets.QWidget):
         template_names = [template.split(":")[0] for template in self.templates]
         self.template_combo.addItems(template_names)
         self.template_combo.currentIndexChanged.connect(self.on_template_changed)
-        templates_layout.addWidget(self.template_combo)
+        templates_layout.addWidget(self.template_combo,stretch=1)
 
         # Etykieta wyświetlająca opis szablonu bezpośrednio pod dropdownem
         self.template_description = QtWidgets.QLabel()
         self.template_description.setWordWrap(True)
-        templates_layout.addWidget(self.template_description)
+        templates_layout.addWidget(self.template_description, stretch=1)
 
         # Dynamiczne pola wejściowe na podstawie wybranego szablonu
         self.dynamic_input_group = QtWidgets.QGroupBox("Configuration Parameters")
         self.dynamic_input_layout = QtWidgets.QFormLayout()
         self.dynamic_input_group.setLayout(self.dynamic_input_layout)
-        templates_layout.addWidget(self.dynamic_input_group)
+        templates_layout.addWidget(self.dynamic_input_group, stretch=8)
 
         self.main_layout.addWidget(templates_group, stretch=11)  # Pozostałe 55% zakładając total stretch=20
 
