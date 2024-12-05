@@ -4,15 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="62ecc583-8d63-460b-8300-b577ccda17fa" name="Changes" comment="lepszy main">
+    <list default="true" id="62ecc583-8d63-460b-8300-b577ccda17fa" name="Changes" comment="Wszystko">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Auto_Finder_Router.py" beforeDir="false" afterPath="$PROJECT_DIR$/Auto_Finder_Router.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/a.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/edge_router.py" beforeDir="false" afterPath="$PROJECT_DIR$/edge_router.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/router_base.py" beforeDir="false" afterPath="$PROJECT_DIR$/router_base.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tmp/Lab_1_Krypto_2024_gr_L2_Mateusz_Nosal.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tmp_testowania_nowej_konfiguracji.py" beforeDir="false" afterPath="$PROJECT_DIR$/tmp_testowania_nowej_konfiguracji.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pages/router_configurator_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/pages/router_configurator_page.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/threads/interface_thread.py" beforeDir="false" afterPath="$PROJECT_DIR$/threads/interface_thread.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmp_router.py" beforeDir="false" afterPath="$PROJECT_DIR$/tmp_router.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,7 +68,7 @@
       <recent name="C:\Users\Mateusz.N\PycharmProjects\Auto-Switch" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.tmp_testowania_nowej_konfiguracji">
+  <component name="RunManager" selected="Python.main">
     <configuration name="Auto_Finder_Router" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Auto-Switch" />
       <option name="ENV_FILES" value="" />
@@ -184,8 +181,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.tmp_testowania_nowej_konfiguracji" />
         <item itemvalue="Python.main" />
+        <item itemvalue="Python.tmp_testowania_nowej_konfiguracji" />
         <item itemvalue="Python.Auto_Finder_Router" />
         <item itemvalue="Python.tmp" />
         <item itemvalue="Python.a" />
@@ -296,7 +293,15 @@
       <option name="project" value="LOCAL" />
       <updated>1732819185474</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="Wszystko">
+      <option name="closed" value="true" />
+      <created>1733271997991</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1733271997991</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -316,6 +321,7 @@
     <MESSAGE value="Dodanie opcji do konfiguracji(bez dostosowania maina oraz gui):&#10;-Interfejsy sieciowe&#10;- VLAN" />
     <MESSAGE value="edgeroutery:&#10;VLAN:&#10;&#10;Tworzenie i zarządzanie VLAN-ami.&#10;Przypisywanie VLAN-ów do interfejsów.&#10;Konfiguracja trunkingu.&#10;Backup i Restore Konfiguracji:&#10;&#10;Automatyczne tworzenie kopii zapasowych konfiguracji routera.&#10;Przywracanie konfiguracji z kopii zapasowej." />
     <MESSAGE value="lepszy main" />
-    <option name="LAST_COMMIT_MESSAGE" value="lepszy main" />
+    <MESSAGE value="Wszystko" />
+    <option name="LAST_COMMIT_MESSAGE" value="Wszystko" />
   </component>
 </project>

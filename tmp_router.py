@@ -56,6 +56,25 @@ class tmp_router(RouterBase):
             self.client = None
             print("Rozłączono z urządzeniem.")
 
+    def execute_commands(self, commands):
+        try:
+            if not self.client:
+                print("Brak połączenia z urządzeniem.")
+                return False
+
+            ssh_shell = self.client.invoke_shell()
+            for cmd in commands:
+                print(f"Wysyłanie komendy: {cmd}")
+                ssh_shell.send(cmd + '\n')
+                output = self.receive_all(ssh_shell)
+                print(output)
+            return True
+        except Exception as e:
+            print(f"Błąd podczas wykonywania komend: {e}")
+            return False
+
+
+
     def get_unique_mac_addresses(self):
         """
         Pobiera unikalne adresy MAC z urządzenia, zwracając słownik:
@@ -110,14 +129,15 @@ class tmp_router(RouterBase):
             print(f"Błąd podczas pobierania adresów MAC: {e}")
             return {}
 
-    def get_unique_phisical_interfaces(self):
+    def get_unique_physical_interfaces(self):
         keys = self.get_unique_mac_addresses()
         processed_keys = [re.split(r'\d', key)[0] for key in keys.keys()]
         port_counts = Counter(processed_keys)
         most_common_port = port_counts.most_common(1)[0][0]
-        phisical_interfaces = [key.split('@')[0] for key in keys.keys() if most_common_port in key]
+        physical_interfaces = [key.split('@')[0] for key in keys.keys() if most_common_port in key]
+        return physical_interfaces
 
-    def get_unique_phisical_interfaces_k(self):
+    def get_unique_physical_interfaces_with_description(self):
         keys = self.get_unique_mac_addresses()
         processed_keys = [re.split(r'\d', key)[0] for key in keys.keys()]
         port_counts = Counter(processed_keys)
@@ -127,37 +147,24 @@ class tmp_router(RouterBase):
         phisical_interfaces = [key.split('@')[0] for key in keys.keys() if most_common_port in key]
         interfaces_with_description = {}
 
-        # Invoke an interactive shell
-        shell = self.client.invoke_shell()
-        shell.recv(1000)  # Clear initial buffer
-
+        ssh_shell = self.client.invoke_shell()
+        cmd = 'configure'
+        ssh_shell.send(cmd + '\n')
         for port in phisical_interfaces:
-            # Enter configuration mode
-            shell.send('configure\n')
-            time.sleep(1)
-
-            # Execute the description command
-            shell.send(f'show interfaces ethernet {port} description\n')
-            time.sleep(1)
-
-            # Read the output
-            output = shell.recv(65535).decode()
-
-            # Exit configuration mode
-            shell.send('exit\n')
-            time.sleep(1)
-
-            # Parse the description from the output
-            match = re.search(r'Description:\s*(.*)', output, re.IGNORECASE)
+            cmd = f'show interfaces ethernet {port} description'
+            ssh_shell.send(cmd + '\n')
+            output = self.receive_all(ssh_shell)
+            match = re.search(r'"([^"]+)"', output)
             if match:
                 description = match.group(1).strip()
             else:
                 description = "No description"
 
-            # Add to the dictionary
             interfaces_with_description[port] = description
 
+        ssh_shell.send('exit\n')
         return interfaces_with_description
+
     def receive_all(self, shell, timeout=2.5):
         output = ''
         shell.setblocking(0)
@@ -173,22 +180,7 @@ class tmp_router(RouterBase):
                 time.sleep(0.1)
         return output
 
-    def execute_commands(self, commands):
-        try:
-            if not self.client:
-                print("Brak połączenia z urządzeniem.")
-                return False
 
-            ssh_shell = self.client.invoke_shell()
-            for cmd in commands:
-                print(f"Wysyłanie komendy: {cmd}")
-                ssh_shell.send(cmd + '\n')
-                output = self.receive_all(ssh_shell)
-                print(output)
-            return True
-        except Exception as e:
-            print(f"Błąd podczas wykonywania komend: {e}")
-            return False
 
     def apply_data_configuration_without_bridge(self, ports):
         """

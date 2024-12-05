@@ -7,32 +7,51 @@ from tmp_router import tmp_router
 from threads.interface_thread import InterfaceThread
 from threads.configuration_thread import ConfigurationThread
 from utils.ui_helpers import set_window_size_percentage
+from config import description_color  # Importujemy słownik z config.py
 
 
 class PortButton(QtWidgets.QPushButton):
     """
-    Custom button representing a port with hover effect.
+    Custom button representing a port with dynamic color palette.
     """
-    def __init__(self, label='', parent=None):
+
+    def __init__(self, label='', parent=None, palette=None):
         super().__init__(label, parent)
         self.setCheckable(True)
-        self.setStyleSheet("""
-            QPushButton {
-                background-color: #5F5F5F;
+        self.palette = palette or {
+            'normal': '#5F5F5F',
+            'hover': '#6F6F6F',
+            'checked': '#505358'
+        }  # Domyślna paleta
+        self.setStyleSheet(self.get_style())
+        self.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
+
+    def get_style(self):
+        """
+        Zwraca odpowiedni styl dla przycisku na podstawie palety kolorów.
+        """
+        return f"""
+            QPushButton {{
+                background-color: {self.palette['normal']};
                 border: 3px solid #9E9E9E;
                 border-radius: 5px;
                 color: #FFFFFF;
-            }
-            QPushButton:hover {
+            }}
+            QPushButton:hover {{
                 border-color: #4CAF50;
-                background-color: #6F6F6F;
-            }
-            QPushButton:checked {
-                background-color: #505358;
+                background-color: {self.palette['hover']};
+            }}
+            QPushButton:checked {{
+                background-color: {self.palette['checked']};
                 border-color: #388E3C;
-            }
-        """)
-        self.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
+            }}
+        """
+
+    def update_style(self):
+        """
+        Aktualizuje styl przycisku. Należy wywołać, jeśli paleta się zmieni.
+        """
+        self.setStyleSheet(self.get_style())
 
 
 class RouterConfiguratorPage(QtWidgets.QWidget):
@@ -108,8 +127,8 @@ class RouterConfiguratorPage(QtWidgets.QWidget):
 
     def on_interfaces_result(self, success, interfaces, error_message):
         if success:
-            # List of physical interfaces
-            self.physical_interfaces = interfaces  # List of interface names
+            # interfaces is now a dict: {interface_name: description}
+            self.physical_interfaces = interfaces
             self.setup_ui_elements()
             self.setEnabled(True)
         else:
@@ -124,13 +143,13 @@ class RouterConfiguratorPage(QtWidgets.QWidget):
         # Clear the main layout
         self.clear_layout(self.main_layout)
 
-        # Section 1: Ports
+        # Sekcja Portów i Legenda
         self.setup_ports_section()
 
-        # Section 2: Template Selection
+        # Sekcja Szablonów Konfiguracji
         self.setup_template_section()
 
-        # Section 3: Apply Button
+        # Przycisk Zastosuj Konfigurację
         apply_button = QtWidgets.QPushButton("Apply Configuration")
         apply_button.clicked.connect(self.apply_configuration)
         self.main_layout.addWidget(apply_button)
@@ -152,61 +171,116 @@ class RouterConfiguratorPage(QtWidgets.QWidget):
 
     def setup_ports_section(self):
         """
-        Sets up the ports section with a dynamic grid of port buttons.
+        Sets up the ports section with a dynamic grid of port buttons and legend.
         """
         ports_group = QtWidgets.QGroupBox("Ports")
         ports_layout = QtWidgets.QVBoxLayout()
         ports_group.setLayout(ports_layout)
 
-        # Container with background color and margins
+        # Ustawienie proporcji wysokości: 45% głównego okna
+        ports_group.setSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Expanding)
+        # Dodanie stretch factor do ports_layout
+        # Główny layout będzie zarządzać proporcjami
+
+        # Container z tłem i marginesami
         ports_container = QtWidgets.QWidget()
         ports_container.setStyleSheet("background-color: #3C3C3C;")  # Adjusted background color
         container_layout = QtWidgets.QVBoxLayout()
         container_layout.setContentsMargins(10, 10, 10, 10)  # Margin
         ports_container.setLayout(container_layout)
 
-        # Grid layout for ports
+        # Grid layout dla portów
         grid_widget = QtWidgets.QWidget()
         grid_layout = QtWidgets.QGridLayout()
         grid_layout.setSpacing(10)  # Set spacing between ports to 10px
         grid_widget.setLayout(grid_layout)
 
-        # Define number of ports
+        # Definicja liczby portów
         self.port_count = 5
         self.port_buttons = {}
-        columns = 5  # 12 columns
-        rows = 1      # 2 rows
+        columns = 5  # 5 columns
+        rows = 1  # 1 row
+
+        # Konwersja słownika interfejsów na listę krotek
+        interfaces_list = list(self.physical_interfaces.items())
 
         for index in range(self.port_count):
-            row = index // columns
-            col = index % columns
+            row_idx = index // columns
+            col_idx = index % columns
 
             port_number = index + 1
             port_label = str(port_number)
 
-            # Get corresponding physical interface, if exists
-            if index < len(self.physical_interfaces):
-                interface_name = self.physical_interfaces[index]
+            # Pobranie odpowiedniego interfejsu i opisu, jeśli istnieje
+            if index < len(interfaces_list):
+                interface_name, description = interfaces_list[index]
             else:
                 interface_name = f"Port {port_number}"
+                description = "No description available."
 
-            port_button = PortButton(port_label)
-            port_button.setToolTip(interface_name)  # Set description as the tooltip
+            # Pobranie palety kolorów z config.py na podstawie opisu
+            palette = description_color.get(description, {
+                'normal': '#5F5F5F',
+                'hover': '#6F6F6F',
+                'checked': '#505358'
+            })  # Domyślna paleta jeśli opis nie jest w słowniku
+
+            port_button = PortButton(port_label, palette=palette)
+            port_button.setToolTip(description)  # Set description as the tooltip
             port_button.setText(port_label)
             port_button.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
 
-            self.port_buttons[port_label] = port_button
-            grid_layout.addWidget(port_button, row, col)
+            # Przechowywanie nazwy interfejsu w właściwości przycisku
+            port_button.setProperty("interface_name", interface_name)
 
-        # Set stretch factors to achieve proportions (2:1 width:height)
+            self.port_buttons[port_label] = port_button
+            grid_layout.addWidget(port_button, row_idx, col_idx)
+
+        # Ustawienie stretch factors, aby osiągnąć proporcje (2:1 width:height)
         for i in range(columns):
             grid_layout.setColumnStretch(i, 2)  # Width proportion
         for i in range(rows):
-            grid_layout.setRowStretch(i, 1)     # Height proportion
+            grid_layout.setRowStretch(i, 1)  # Height proportion
 
         container_layout.addWidget(grid_widget)
+
+        # Dodanie sekcji Legenda bez tytułu
+        self.setup_legend_section(container_layout)
+
         ports_layout.addWidget(ports_container)
-        self.main_layout.addWidget(ports_group)
+        self.main_layout.addWidget(ports_group, stretch=9)  # 45% zakładając 20 jako całkowity stretch
+
+    def setup_legend_section(self, parent_layout):
+        """
+        Sets up the legend section explaining the color codes without a title, embedded in Ports Section.
+        """
+        # Tworzymy widget na legendę
+        legend_widget = QtWidgets.QWidget()
+        legend_layout = QtWidgets.QHBoxLayout()
+        legend_layout.setSpacing(20)  # Odstęp między wpisami w legendzie
+        legend_widget.setLayout(legend_layout)
+
+        # Iterujemy przez opis i kolory w config.py
+        for description, colors in description_color.items():
+            # Tworzymy poziomy layout dla każdego wpisu w legendzie
+            legend_entry = QtWidgets.QHBoxLayout()
+
+            # Tworzymy kolorowy prostokąt
+            color_box = QtWidgets.QLabel()
+            color_box.setFixedSize(20, 20)
+            color_box.setStyleSheet(f"background-color: {colors['normal']}; border: 1px solid #000000;")
+            legend_entry.addWidget(color_box)
+
+            # Dodajemy opis
+            description_label = QtWidgets.QLabel(description)
+            description_label.setStyleSheet("color: #FFFFFF;")
+            legend_entry.addWidget(description_label)
+
+            # Dodajemy wpis do layoutu legendy
+            legend_layout.addLayout(legend_entry)
+
+        # Dodajemy legendę do parent_layout (Ports Container Layout)
+        parent_layout.addWidget(legend_widget, alignment=QtCore.Qt.AlignmentFlag.AlignLeft)
 
     def setup_template_section(self):
         """
@@ -216,49 +290,49 @@ class RouterConfiguratorPage(QtWidgets.QWidget):
         templates_layout = QtWidgets.QVBoxLayout()
         templates_group.setLayout(templates_layout)
 
-        # List of available templates
+        # Lista dostępnych szablonów
         self.templates = [
             "dhcp_server: Configure the router as a DHCP server.",
             "lan_dhcp: Configure LAN DHCP settings.",
             "data_configuration_without_bridge: Apply data configurations without bridging."
         ]
 
-        # ComboBox for template selection
+        # ComboBox do wyboru szablonu
         self.template_combo = QtWidgets.QComboBox()
-        # Add only the template name to the ComboBox
+        # Dodajemy tylko nazwę szablonu do ComboBox
         template_names = [template.split(":")[0] for template in self.templates]
         self.template_combo.addItems(template_names)
         self.template_combo.currentIndexChanged.connect(self.on_template_changed)
         templates_layout.addWidget(self.template_combo)
 
-        # Label for displaying the template description directly under the dropdown
+        # Etykieta wyświetlająca opis szablonu bezpośrednio pod dropdownem
         self.template_description = QtWidgets.QLabel()
         self.template_description.setWordWrap(True)
         templates_layout.addWidget(self.template_description)
 
-        # Dynamic input fields based on the selected template
+        # Dynamiczne pola wejściowe na podstawie wybranego szablonu
         self.dynamic_input_group = QtWidgets.QGroupBox("Configuration Parameters")
         self.dynamic_input_layout = QtWidgets.QFormLayout()
         self.dynamic_input_group.setLayout(self.dynamic_input_layout)
         templates_layout.addWidget(self.dynamic_input_group)
 
-        self.main_layout.addWidget(templates_group)
+        self.main_layout.addWidget(templates_group, stretch=11)  # Pozostałe 55% zakładając total stretch=20
 
-        # Initialize inputs for the first template
+        # Inicjalizacja inputów dla pierwszego szablonu
         self.on_template_changed(0)
 
     def on_template_changed(self, index):
         """
         Updates the template description and dynamic inputs based on the selected template.
         """
-        # Update the template description
+        # Aktualizacja opisu szablonu
         description = self.templates[index].split(": ", 1)[1]
         self.template_description.setText(description)
 
-        # Clear existing inputs
+        # Czyszczenie istniejących inputów
         self.clear_layout(self.dynamic_input_layout)
 
-        # Create inputs based on the selected template
+        # Tworzenie inputów na podstawie wybranego szablonu
         selected_template = self.templates[index].split(":")[0]
 
         if selected_template == "dhcp_server":
@@ -279,13 +353,13 @@ class RouterConfiguratorPage(QtWidgets.QWidget):
             self.dynamic_input_layout.addRow("DHCP Range Start and Stop:", self.dhcp_range_input)
 
         elif selected_template == "lan_dhcp":
-            # Informational label
+            # Informacyjna etykieta
             info_label = QtWidgets.QLabel("LAN DHCP configuration will be applied to the selected ports.")
             info_label.setWordWrap(True)
             self.dynamic_input_layout.addRow(info_label)
 
         elif selected_template == "data_configuration_without_bridge":
-            # Informational label
+            # Informacyjna etykieta
             info_label = QtWidgets.QLabel("Data configuration without bridge will be applied to the selected ports.")
             info_label.setWordWrap(True)
             self.dynamic_input_layout.addRow(info_label)
@@ -294,20 +368,22 @@ class RouterConfiguratorPage(QtWidgets.QWidget):
         selected_template_index = self.template_combo.currentIndex()
         selected_template = self.templates[selected_template_index].split(":")[0]
 
-        # List of selected ports for configuration (use tooltips instead of labels)
-        selected_ports = [btn.toolTip() for btn in self.port_buttons.values() if btn.isChecked()]
+        # Lista wybranych portów do konfiguracji (używając nazw interfejsów przechowywanych w właściwościach)
+        selected_ports = [
+            btn.property("interface_name") for btn in self.port_buttons.values() if btn.isChecked()
+        ]
 
-        # Validate template selection
+        # Walidacja wyboru szablonu
         if not selected_template:
             QtWidgets.QMessageBox.warning(self, "Error", "No configuration template selected.")
             return
 
-        # Validate port selection
+        # Walidacja wyboru portów
         if not selected_ports:
             QtWidgets.QMessageBox.warning(self, "No Ports Selected", "No ports selected for configuration.")
             return
 
-        # Get dynamic inputs based on the selected template
+        # Pobranie dynamicznych inputów na podstawie wybranego szablonu
         config_params = {}
         if selected_template == "dhcp_server":
             name_server = self.name_server_input.text()
@@ -319,11 +395,12 @@ class RouterConfiguratorPage(QtWidgets.QWidget):
                 QtWidgets.QMessageBox.warning(self, "Error", "All fields are required for DHCP Server configuration.")
                 return
 
-            # Split dhcp_range_start and dhcp_range_stop
+            # Rozdzielenie zakresu DHCP na start i stop
             try:
                 dhcp_range_start, dhcp_range_stop = dhcp_range.split()
             except ValueError:
-                QtWidgets.QMessageBox.warning(self, "Error", "DHCP Range must contain two addresses separated by a space.")
+                QtWidgets.QMessageBox.warning(self, "Error",
+                                              "DHCP Range must contain two addresses separated by a space.")
                 return
 
             config_params = {
@@ -335,32 +412,32 @@ class RouterConfiguratorPage(QtWidgets.QWidget):
             }
 
         elif selected_template == "lan_dhcp":
-            # No additional parameters required
+            # Nie wymagane dodatkowe parametry
             config_params = {
                 "ports": selected_ports
             }
 
         elif selected_template == "data_configuration_without_bridge":
-            # No additional parameters required
+            # Nie wymagane dodatkowe parametry
             config_params = {
                 "ports": selected_ports
             }
 
-        # Disable the interface
+        # Wyłączenie interfejsu
         self.setEnabled(False)
 
-        # Start configuration in a separate thread
+        # Uruchomienie konfiguracji w oddzielnym wątku
         self.configuration_thread = ConfigurationThread(
             self.router,
             selected_template,
             selected_ports,
-            config_params  # Pass additional parameters
+            config_params  # Przekazanie dodatkowych parametrów
         )
         self.configuration_thread.configuration_result.connect(self.on_configuration_result)
         self.configuration_thread.start()
 
     def on_configuration_result(self, success, message):
-        # Re-enable the interface
+        # Ponowne włączenie interfejsu
         self.setEnabled(True)
 
         if success:
