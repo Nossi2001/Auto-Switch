@@ -5,32 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="62ecc583-8d63-460b-8300-b577ccda17fa" name="Changes" comment="wypisanie serwerów dhcp">
+      <change afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pages/start_page.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_05_12_2024_18_35__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_05_12_2024_18_35__Changes_.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Auto_Finder_Router.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cisco_ios_router.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/config.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/edge_router.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/open_wrt_router.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pages/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pages/connect_page.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pages/device_list_page.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pages/manual_login_page.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pages/router_configurator_page.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pages/start_page.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/router_base.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/threads/DHCPInfoThread.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/threads/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/threads/configuration_thread.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/threads/connection_thread.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/threads/interface_thread.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/threads/scan_thread.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tmp_router.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tmp_testowania_nowej_konfiguracji.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/ui_helpers.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/widgets/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/widgets/toggle_button.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,29 +35,29 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python.Auto_Finder_Router.executor": "Run",
-    "Python.Cisco.executor": "Run",
-    "Python.L2_zad-1_Krypto_2024.executor": "Run",
-    "Python.Lab_1_Krypto_2024_gr_L2_Mateusz_Nosal (1).executor": "Run",
-    "Python.Lab_2_Krypto_2024_gr_L2_Mateusz_Nosal.executor": "Run",
-    "Python.Lab_3_Krypto_2024_gr_L2_Mateusz_Nosal.executor": "Run",
-    "Python.Lab_4_Krypto_2024_gr_L2_Mateusz_Nosal.executor": "Run",
-    "Python.a.executor": "Run",
-    "Python.main.executor": "Run",
-    "Python.open_wrt_router.executor": "Run",
-    "Python.tmp.executor": "Run",
-    "Python.tmp1.executor": "Run",
-    "Python.tmp2.executor": "Run",
-    "Python.tmp_router.executor": "Run",
-    "Python.tmp_testowania_nowej_konfiguracji.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master",
-    "last_opened_file_path": "C:/Users/Mateusz.N/PycharmProjects/Auto-Switch/pages",
-    "settings.editor.selected.configurable": "org.jetbrains.plugins.github.ui.GithubSettingsConfigurable"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.Auto_Finder_Router.executor&quot;: &quot;Run&quot;,
+    &quot;Python.Cisco.executor&quot;: &quot;Run&quot;,
+    &quot;Python.L2_zad-1_Krypto_2024.executor&quot;: &quot;Run&quot;,
+    &quot;Python.Lab_1_Krypto_2024_gr_L2_Mateusz_Nosal (1).executor&quot;: &quot;Run&quot;,
+    &quot;Python.Lab_2_Krypto_2024_gr_L2_Mateusz_Nosal.executor&quot;: &quot;Run&quot;,
+    &quot;Python.Lab_3_Krypto_2024_gr_L2_Mateusz_Nosal.executor&quot;: &quot;Run&quot;,
+    &quot;Python.Lab_4_Krypto_2024_gr_L2_Mateusz_Nosal.executor&quot;: &quot;Run&quot;,
+    &quot;Python.a.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;Python.open_wrt_router.executor&quot;: &quot;Run&quot;,
+    &quot;Python.tmp.executor&quot;: &quot;Run&quot;,
+    &quot;Python.tmp1.executor&quot;: &quot;Run&quot;,
+    &quot;Python.tmp2.executor&quot;: &quot;Run&quot;,
+    &quot;Python.tmp_router.executor&quot;: &quot;Run&quot;,
+    &quot;Python.tmp_testowania_nowej_konfiguracji.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Mateusz.N/PycharmProjects/Auto-Switch/pages&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;org.jetbrains.plugins.github.ui.GithubSettingsConfigurable&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Mateusz.N\PycharmProjects\Auto-Switch\pages" />
@@ -92,7 +70,7 @@
       <recent name="C:\Users\Mateusz.N\PycharmProjects\Auto-Switch" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.Cisco">
+  <component name="RunManager" selected="Python.main">
     <configuration name="Auto_Finder_Router" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Auto-Switch" />
       <option name="ENV_FILES" value="" />
