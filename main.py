@@ -1,3 +1,4 @@
+# main.py
 import sys
 from PyQt6 import QtWidgets
 from pages.start_page import StartPage

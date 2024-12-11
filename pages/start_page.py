@@ -1,7 +1,6 @@
-# pages/start_page.py
-
 from PyQt6 import QtWidgets, QtCore
 from config import Cisco_Router, Cisco_Switch
+from styles import BASE_STYLE
 
 class StartPage(QtWidgets.QWidget):
     def __init__(self, stacked_widget):
@@ -9,29 +8,7 @@ class StartPage(QtWidgets.QWidget):
         self.stacked_widget = stacked_widget
         self.go_to_config_page = None
 
-        self.setStyleSheet("""
-            QWidget {
-                background-color: #2B2B2B;
-                color: #FFFFFF;
-                font-family: Arial;
-            }
-            QRadioButton {
-                font-size:16px;
-                color:#FFFFFF;
-            }
-            QPushButton {
-                background-color:#5F5F5F;
-                border:2px solid #9E9E9E;
-                border-radius:5px;
-                color:#FFFFFF;
-                font-size:16px;
-                padding:5px 10px;
-            }
-            QPushButton:hover {
-                border-color:#4CAF50;
-                background-color:#6F6F6F;
-            }
-        """)
+        self.setStyleSheet(BASE_STYLE)
 
         self.device_type = 'router'
         self.init_ui()

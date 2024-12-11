@@ -3,8 +3,7 @@
 Cisco_Router = {
     'Cisco 1841': {
         'interfaces': [
-            "Fa0/0",
-            "Fa0/1"
+            "Fa0/0", "Fa0/1"
         ],
         'description': "Popularny model do nauki konfiguracji sieci w Packet Tracerze.",
         'method_list': (
@@ -14,7 +13,10 @@ Cisco_Router = {
             'apply_dynamic_routing',
             'apply_nat',
             'apply_dhcp_server',
-            'default_interface'
+            'default_interface',
+            'set_access_vlan',        # Dodane nowe metody VLAN
+            'set_trunk_vlan',
+            'set_native_vlan'
         )
     },
     'Cisco 1941': {
@@ -32,7 +34,10 @@ Cisco_Router = {
             'apply_dynamic_routing',
             'apply_nat',
             'apply_dhcp_server',
-            'default_interface'
+            'default_interface',
+            'set_access_vlan',        # Dodane nowe metody VLAN
+            'set_trunk_vlan',
+            'set_native_vlan'
         )
     },
     'Cisco 2811': {
@@ -46,7 +51,11 @@ Cisco_Router = {
             'backup_config',
             'apply_static_routing',
             'apply_dynamic_routing',
-            'default_interface'
+            'default_interface',
+            'set_access_vlan',        # Dodane nowe metody VLAN
+            'set_trunk_vlan',
+            'set_voice_vlan',
+            'set_native_vlan'
         )
     },
     'Cisco 2911': {
@@ -63,7 +72,11 @@ Cisco_Router = {
             'apply_static_routing',
             'apply_dynamic_routing',
             'apply_qos',
-            'default_interface'
+            'default_interface',
+            'set_access_vlan',        # Dodane nowe metody VLAN
+            'set_trunk_vlan',
+            'set_voice_vlan',
+            'set_native_vlan'
         )
     },
     'Cisco ISR 4321': {
@@ -78,7 +91,11 @@ Cisco_Router = {
             'apply_static_routing',
             'apply_dynamic_routing',
             'apply_nat',
-            'default_interface'
+            'default_interface',
+            'set_access_vlan',        # Dodane nowe metody VLAN
+            'set_trunk_vlan',
+            'set_voice_vlan',
+            'set_native_vlan'
         )
     }
 }
@@ -118,6 +135,10 @@ Cisco_Switch = {
             'apply_config',
             'enable_vlan',
             'apply_dhcp_server',
+            'set_access_vlan',
+            'set_trunk_vlan',
+            'set_voice_vlan',
+            'set_native_vlan',
             'default_interface'
         )
     },
@@ -136,40 +157,32 @@ Cisco_Switch = {
             'enable_routing',
             'apply_static_routing',
             'apply_dynamic_routing',
+            'set_access_vlan',
+            'set_trunk_vlan',
+            'set_voice_vlan',
+            'set_native_vlan',
             'default_interface'
         )
     },
-    'Cisco 2950': {
+    'Cisco 2960': {
         'interfaces': [
-            "Fa1/0/1",
-            "Fa1/0/2",
-            "Fa1/0/3",
-            "Fa1/0/4",
-            "Fa1/0/5",
-            "Fa1/0/6",
-            "Fa1/0/7",
-            "Fa1/0/8",
-            "Fa1/0/9",
-            "Fa1/0/10",
-            "Fa1/0/11",
-            "Fa1/0/12",
-            "Fa1/0/13",
-            "Fa1/0/14",
-            "Fa1/0/15",
-            "Fa1/0/16",
-            "Fa1/0/17",
-            "Fa1/0/18",
-            "Fa1/0/19",
-            "Fa1/0/20",
-            "Fa1/0/21",
-            "Fa1/0/22",
-            "Fa1/0/23",
-            "Fa1/0/24"
+            "Fa0/1", "Fa0/2", "Fa0/3", "Fa0/4",
+            "Fa0/5", "Fa0/6", "Fa0/7", "Fa0/8",
+            "Fa0/9", "Fa0/10", "Fa0/11", "Fa0/12",
+            "Fa0/13", "Fa0/14", "Fa0/15", "Fa0/16",
+            "Fa0/17", "Fa0/18", "Fa0/19", "Fa0/20",
+            "Fa0/21", "Fa0/22", "Fa0/23", "Fa0/24",
+            "Gi0/1", "Gi0/2"
         ],
-        'description': "Starszy model switcha, nadal używany w podstawowych sieciach.",
+        'description': "Najpopularniejszy switch do nauki w Packet Tracerze.",
         'method_list': (
             'apply_config',
-            'monitor_traffic',
+            'enable_vlan',
+            'apply_dhcp_server',
+            'set_access_vlan',
+            'set_trunk_vlan',
+            'set_voice_vlan',
+            'set_native_vlan',
             'default_interface'
         )
     },
@@ -207,18 +220,27 @@ Cisco_Switch = {
         'description': "Zaawansowany switch warstwy 3 dla złożonych topologii.",
         'method_list': (
             'apply_config',
+            'optimize_performance',
+            'enable_vlan',
             'enable_qos',
-            'apply_static_routing',
-            'apply_dynamic_routing',
+            'set_access_vlan',
+            'set_trunk_vlan',
+            'set_voice_vlan',
+            'set_native_vlan',
             'default_interface'
         )
     },
     'Cisco Catalyst 9200': {
+
         'interfaces': [
-            "Gi1/0/1",
-            "Gi1/0/2",
-            # ... kontynuacja do Gi1/0/48 ...
-            "Gi1/0/48"
+            "Gi1/0/1", "Gi1/0/2", "Gi1/0/3", "Gi1/0/4", "Gi1/0/5", "Gi1/0/6",
+            "Gi1/0/7", "Gi1/0/8", "Gi1/0/9", "Gi1/0/10", "Gi1/0/11", "Gi1/0/12",
+            "Gi1/0/13", "Gi1/0/14", "Gi1/0/15", "Gi1/0/16", "Gi1/0/17", "Gi1/0/18",
+            "Gi1/0/19", "Gi1/0/20", "Gi1/0/21", "Gi1/0/22", "Gi1/0/23", "Gi1/0/24",
+            "Gi1/0/25", "Gi1/0/26", "Gi1/0/27", "Gi1/0/28", "Gi1/0/29", "Gi1/0/30",
+            "Gi1/0/31", "Gi1/0/32", "Gi1/0/33", "Gi1/0/34", "Gi1/0/35", "Gi1/0/36",
+            "Gi1/0/37", "Gi1/0/38", "Gi1/0/39", "Gi1/0/40", "Gi1/0/41", "Gi1/0/42",
+            "Gi1/0/43", "Gi1/0/44", "Gi1/0/45", "Gi1/0/46", "Gi1/0/47", "Gi1/0/48"
         ],
         'description': "Nowoczesny switch z wieloma funkcjami VLAN i zarządzania.",
         'method_list': (
@@ -226,6 +248,10 @@ Cisco_Switch = {
             'optimize_performance',
             'enable_vlan',
             'enable_qos',
+            'set_access_vlan',
+            'set_trunk_vlan',
+            'set_voice_vlan',
+            'set_native_vlan',
             'default_interface'
         )
     }
@@ -244,40 +270,3 @@ description_color = {
     "Router nowej generacji wspierający wirtualizację.": {'normal': '#5F5F5F', 'hover': '#6F6F6F', 'checked': '#505358'}
 }
 
-methods_inputs = {
-    'apply_data_template': ["VLAN ID", "Profile Name", "Color", "VLAN Routing", "VLAN Setting", "VLAN IP Address", "Subnet Mask", "DHCP Server", "start", "stop"],
-    'apply_static_routing': ["Destination Network", "Subnet Mask", "Next Hop IP"],
-    'apply_dynamic_routing': ["Routing Protocol", "Process ID", "Area ID"],
-    'apply_nat': ["Inside Interface", "Outside Interface", "Pool Name", "Pool Start IP", "Pool End IP", "Access List"],
-    'apply_dhcp_server': ["Pool Name", "Network", "Subnet Mask", "Default Router", "DNS Server", "Lease Time"],
-    'apply_config': [],
-    'restart_router': [],
-    'update_firmware': ["Firmware URL"],
-    'backup_config': [],
-    'monitor_traffic': [],
-    'enable_virtualization': [],
-    'apply_qos': [],
-    'enable_vlan': ["VLAN ID", "VLAN Name"],
-    'enable_routing': [],
-    'optimize_performance': [],
-    'default_interface': ["Interface"]
-}
-
-optional_params = {
-    'apply_data_template': ["Color", "DHCP Server", "start", "stop"],
-    'apply_static_routing': [],
-    'apply_dynamic_routing': ["Area ID"],
-    'apply_nat': [],
-    'apply_dhcp_server': ["DNS Server"],
-    'apply_config': [],
-    'restart_router': [],
-    'update_firmware': [],
-    'backup_config': [],
-    'monitor_traffic': [],
-    'enable_virtualization': [],
-    'apply_qos': [],
-    'enable_vlan': [],
-    'enable_routing': [],
-    'optimize_performance': [],
-    'default_interface': []
-}
