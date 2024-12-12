@@ -7,7 +7,7 @@ Cisco_Router = {
         ],
         'description': "Popularny model do nauki konfiguracji sieci w Packet Tracerze.",
         'method_list': (
-            'restart_router',
+            'restart_device',
             'apply_static_routing',
             'apply_dynamic_routing',
             'apply_nat',
@@ -24,11 +24,6 @@ Cisco_Router = {
         ],
         'description': "Nowszy model wspierający VLAN, ACL i technologie WAN.",
         'method_list': (
-            'apply_data_template',
-            'restart_router',
-            'apply_static_routing',
-            'apply_dynamic_routing',
-            'apply_nat',
             'apply_dhcp_server',
             'default_interface'
         )
@@ -41,7 +36,7 @@ Cisco_Router = {
         'description': "Uniwersalny router dla małych i średnich sieci.",
         'method_list': (
             'apply_data_template',
-            'restart_router',
+            'restart_device',
             'apply_static_routing',
             'apply_dynamic_routing',
             'apply_nat',
@@ -59,7 +54,7 @@ Cisco_Router = {
         'description': "Zaawansowany router z obsługą multimediów i QoS.",
         'method_list': (
             'apply_data_template',
-            'restart_router',
+            'restart_device',
             'apply_static_routing',
             'apply_dynamic_routing',
             'apply_nat',
@@ -75,7 +70,7 @@ Cisco_Router = {
         'description': "Router nowej generacji wspierający wirtualizację.",
         'method_list': (
             'apply_data_template',
-            'restart_router',
+            'restart_device',
             'apply_static_routing',
             'apply_dynamic_routing',
             'apply_nat',
@@ -154,9 +149,9 @@ Cisco_Switch = {
         ],
         'description': "Najpopularniejszy switch do nauki w Packet Tracerze.",
         'method_list': (
-                        'set_access_vlan',
-                        'restart_router',
+                        'restart_device',
                         'apply_dhcp_server',
+                        'set_access_vlan',
                         'set_trunk_vlan',
                         'set_native_vlan',
                         'default_interface'

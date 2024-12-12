@@ -315,7 +315,7 @@ class ConfigPage(QtWidgets.QWidget):
                     for btn in self.port_buttons.values():
                         if btn.property("interface_name") == port:
                             btn.set_color('#5F5F5F')  # Resetuj kolor
-            if selected_method == "restart_router":
+            if selected_method == "restart_device":
                 for btn in self.port_buttons.values():
                     btn.set_color('#5F5F5F')
                 self.vlan_legend.clear_legends()

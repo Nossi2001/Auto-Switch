@@ -543,7 +543,7 @@ def apply_dhcp_server(params, selected_ports):
     return "\n".join(lines)
 
 
-def restart_router(params, selected_ports):
+def restart_device(params, selected_ports):
     used_vlans = {}
     lines = [
         "!Imoportant blank line"
@@ -685,7 +685,7 @@ TEMPLATE_FUNCTIONS = {
     'apply_static_routing': apply_static_routing,
     'apply_dynamic_routing': apply_dynamic_routing,
     'apply_dhcp_server': apply_dhcp_server,
-    'restart_router': restart_router,
+    'restart_device': restart_device,
     'update_firmware': update_firmware,
 
     'enable_vlan': enable_vlan,
