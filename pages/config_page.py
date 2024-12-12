@@ -309,6 +309,16 @@ class ConfigPage(QtWidgets.QWidget):
             if not func:
                 QtWidgets.QMessageBox.warning(self, "Błąd", f"Brak logiki dla metody: {selected_method}")
                 return
+            if selected_method == "default_interface":
+                # Resetowanie kolorów w GUI
+                for port in selected_ports:
+                    for btn in self.port_buttons.values():
+                        if btn.property("interface_name") == port:
+                            btn.set_color('#5F5F5F')  # Resetuj kolor
+            if selected_method == "restart_router":
+                for btn in self.port_buttons.values():
+                    btn.set_color('#5F5F5F')
+                self.vlan_legend.clear_legends()
 
             if selected_method in ["apply_data_template", "set_access_vlan", "set_trunk_vlan", "set_native_vlan"]:
                 config_text = func(params_values, selected_ports, self.used_vlans)

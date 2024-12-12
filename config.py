@@ -117,12 +117,9 @@ Cisco_Switch = {
         ],
         'description': "Najpopularniejszy switch do nauki w Packet Tracerze.",
         'method_list': (
-            'apply_config',
-            'enable_vlan',
-            'apply_dhcp_server',
             'set_access_vlan',
+            'apply_dhcp_server',
             'set_trunk_vlan',
-            'set_voice_vlan',
             'set_native_vlan',
             'default_interface'
         )
@@ -138,13 +135,9 @@ Cisco_Switch = {
         ],
         'description': "Switch warstwy 3 wspierający routing między VLAN-ami.",
         'method_list': (
-            'apply_config',
-            'enable_routing',
-            'apply_static_routing',
-            'apply_dynamic_routing',
             'set_access_vlan',
+            'apply_dhcp_server',
             'set_trunk_vlan',
-            'set_voice_vlan',
             'set_native_vlan',
             'default_interface'
         )
@@ -161,12 +154,12 @@ Cisco_Switch = {
         ],
         'description': "Najpopularniejszy switch do nauki w Packet Tracerze.",
         'method_list': (
-            'apply_dhcp_server',
-            'set_access_vlan',
-            'set_trunk_vlan',
-            'set_voice_vlan',
-            'set_native_vlan',
-            'default_interface'
+                        'set_access_vlan',
+                        'restart_router',
+                        'apply_dhcp_server',
+                        'set_trunk_vlan',
+                        'set_native_vlan',
+                        'default_interface'
         )
     },
     'Cisco Catalyst 3650': {
@@ -202,10 +195,9 @@ Cisco_Switch = {
         ],
         'description': "Zaawansowany switch warstwy 3 dla złożonych topologii.",
         'method_list': (
+                        'set_access_vlan',
             'apply_dhcp_server',
-            'set_access_vlan',
             'set_trunk_vlan',
-            'set_voice_vlan',
             'set_native_vlan',
             'default_interface'
         )
@@ -224,10 +216,9 @@ Cisco_Switch = {
         ],
         'description': "Nowoczesny switch z wieloma funkcjami VLAN i zarządzania.",
         'method_list': (
+                        'set_access_vlan',
             'apply_dhcp_server',
-            'set_access_vlan',
             'set_trunk_vlan',
-            'set_voice_vlan',
             'set_native_vlan',
             'default_interface'
         )

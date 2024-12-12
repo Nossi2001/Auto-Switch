@@ -215,14 +215,7 @@ def set_trunk_vlan(params, selected_ports, used_vlans=None):
     if used_vlans is None:
         used_vlans = {}
 
-    color = "#5F5F5F"  # Domyślny kolor
 
-    used_vlans[first_vlan_id] = {
-        'name': f"VLAN {first_vlan_id}",
-        'color': color,
-        'description': description,
-        'method': 'set_trunk_vlan'
-    }
 
     lines = ["configure terminal"]
 
@@ -248,6 +241,16 @@ def set_trunk_vlan(params, selected_ports, used_vlans=None):
 
 
 def set_native_vlan(params, selected_ports, used_vlans=None):
+    """
+    Konfiguruje Native VLAN na wybranych interfejsach trunk.
+
+    Parameters:
+        params (dict): Parametry zawierające ID Native VLAN, opis, kolor i allowed VLANs.
+        selected_ports (list): Lista wybranych interfejsów.
+        used_vlans (dict, optional): Słownik VLAN-ów używanych w konfiguracji.
+    Returns:
+        str: Wygenerowana konfiguracja CLI.
+    """
     if not selected_ports:
         raise TemplateError("Nie wybrano interfejsów dla Native VLAN.")
 
@@ -262,6 +265,18 @@ def set_native_vlan(params, selected_ports, used_vlans=None):
     if not color or not validate_color(color):
         color = "#5F5F5F"
 
+    # Pobierz allowed VLANs z parametrów
+    allowed_vlans = params.get("Allowed VLANs", "").strip()
+    if allowed_vlans:
+        # Walidacja listy VLANs
+        try:
+            vlan_list = [int(v.strip()) for v in allowed_vlans.split(",") if v.strip().isdigit()]
+            if any(v < 1 or v > 4094 for v in vlan_list):
+                raise ValueError
+        except ValueError:
+            raise TemplateError("Lista Allowed VLANs zawiera nieprawidłowe wartości.")
+        allowed_vlans = ",".join(map(str, vlan_list))  # Konwersja na poprawny format CLI
+
     if used_vlans is None:
         used_vlans = {}
 
@@ -275,6 +290,7 @@ def set_native_vlan(params, selected_ports, used_vlans=None):
         'method': 'set_native_vlan'
     }
 
+    # Generowanie konfiguracji CLI
     lines = ["configure terminal",
              f"vlan {native_vlan}",
              f" name VLAN_{native_vlan}",
@@ -286,6 +302,8 @@ def set_native_vlan(params, selected_ports, used_vlans=None):
             lines.append(f" description {description}")
         lines.append(" switchport mode trunk")
         lines.append(f" switchport trunk native vlan {native_vlan}")
+        if allowed_vlans:
+            lines.append(f" switchport trunk allowed vlan {allowed_vlans}")
         lines.append(" no shutdown")
         lines.append("exit")
 
@@ -526,6 +544,7 @@ def apply_dhcp_server(params, selected_ports):
 
 
 def restart_router(params, selected_ports):
+    used_vlans = {}
     lines = [
         "!Imoportant blank line"
         "write erase",
@@ -653,6 +672,7 @@ def default_interface(params, selected_ports):
         lines.append("exit")
 
 
+
     return "\n".join(lines)
 
 
@@ -669,6 +689,5 @@ TEMPLATE_FUNCTIONS = {
     'update_firmware': update_firmware,
 
     'enable_vlan': enable_vlan,
-
     'default_interface': default_interface
 }
