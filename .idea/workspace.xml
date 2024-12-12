@@ -4,15 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="62ecc583-8d63-460b-8300-b577ccda17fa" name="Changes" comment="dodanie brakującego pliku config">
-      <change afterPath="$PROJECT_DIR$/methods_data.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/styles.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/widgets/custom_widgets.py" afterDir="false" />
+    <list default="true" id="62ecc583-8d63-460b-8300-b577ccda17fa" name="Changes" comment="Braki w nektórych metodach.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pages/config_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/pages/config_page.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pages/start_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/pages/start_page.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/template_logic.py" beforeDir="false" afterPath="$PROJECT_DIR$/template_logic.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/widgets/custom_widgets.py" beforeDir="false" afterPath="$PROJECT_DIR$/widgets/custom_widgets.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

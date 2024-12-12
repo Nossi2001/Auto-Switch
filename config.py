@@ -7,16 +7,12 @@ Cisco_Router = {
         ],
         'description': "Popularny model do nauki konfiguracji sieci w Packet Tracerze.",
         'method_list': (
-            'apply_data_template',
             'restart_router',
             'apply_static_routing',
             'apply_dynamic_routing',
             'apply_nat',
             'apply_dhcp_server',
-            'default_interface',
-            'set_access_vlan',        # Dodane nowe metody VLAN
-            'set_trunk_vlan',
-            'set_native_vlan'
+            'default_interface'
         )
     },
     'Cisco 1941': {
@@ -28,16 +24,13 @@ Cisco_Router = {
         ],
         'description': "Nowszy model wspierający VLAN, ACL i technologie WAN.",
         'method_list': (
-            'apply_config',
-            'update_firmware',
+            'apply_data_template',
+            'restart_router',
             'apply_static_routing',
             'apply_dynamic_routing',
             'apply_nat',
             'apply_dhcp_server',
-            'default_interface',
-            'set_access_vlan',        # Dodane nowe metody VLAN
-            'set_trunk_vlan',
-            'set_native_vlan'
+            'default_interface'
         )
     },
     'Cisco 2811': {
@@ -47,15 +40,13 @@ Cisco_Router = {
         ],
         'description': "Uniwersalny router dla małych i średnich sieci.",
         'method_list': (
-            'apply_config',
-            'backup_config',
+            'apply_data_template',
+            'restart_router',
             'apply_static_routing',
             'apply_dynamic_routing',
-            'default_interface',
-            'set_access_vlan',        # Dodane nowe metody VLAN
-            'set_trunk_vlan',
-            'set_voice_vlan',
-            'set_native_vlan'
+            'apply_nat',
+            'apply_dhcp_server',
+            'default_interface'
         )
     },
     'Cisco 2911': {
@@ -67,16 +58,13 @@ Cisco_Router = {
         ],
         'description': "Zaawansowany router z obsługą multimediów i QoS.",
         'method_list': (
-            'apply_config',
-            'monitor_traffic',
+            'apply_data_template',
+            'restart_router',
             'apply_static_routing',
             'apply_dynamic_routing',
-            'apply_qos',
-            'default_interface',
-            'set_access_vlan',        # Dodane nowe metody VLAN
-            'set_trunk_vlan',
-            'set_voice_vlan',
-            'set_native_vlan'
+            'apply_nat',
+            'apply_dhcp_server',
+            'default_interface'
         )
     },
     'Cisco ISR 4321': {
@@ -86,16 +74,13 @@ Cisco_Router = {
         ],
         'description': "Router nowej generacji wspierający wirtualizację.",
         'method_list': (
-            'apply_config',
-            'enable_virtualization',
+            'apply_data_template',
+            'restart_router',
             'apply_static_routing',
             'apply_dynamic_routing',
             'apply_nat',
-            'default_interface',
-            'set_access_vlan',        # Dodane nowe metody VLAN
-            'set_trunk_vlan',
-            'set_voice_vlan',
-            'set_native_vlan'
+            'apply_dhcp_server',
+            'default_interface'
         )
     }
 }
@@ -176,8 +161,6 @@ Cisco_Switch = {
         ],
         'description': "Najpopularniejszy switch do nauki w Packet Tracerze.",
         'method_list': (
-            'apply_config',
-            'enable_vlan',
             'apply_dhcp_server',
             'set_access_vlan',
             'set_trunk_vlan',
@@ -219,10 +202,7 @@ Cisco_Switch = {
         ],
         'description': "Zaawansowany switch warstwy 3 dla złożonych topologii.",
         'method_list': (
-            'apply_config',
-            'optimize_performance',
-            'enable_vlan',
-            'enable_qos',
+            'apply_dhcp_server',
             'set_access_vlan',
             'set_trunk_vlan',
             'set_voice_vlan',
@@ -244,10 +224,7 @@ Cisco_Switch = {
         ],
         'description': "Nowoczesny switch z wieloma funkcjami VLAN i zarządzania.",
         'method_list': (
-            'apply_config',
-            'optimize_performance',
-            'enable_vlan',
-            'enable_qos',
+            'apply_dhcp_server',
             'set_access_vlan',
             'set_trunk_vlan',
             'set_voice_vlan',

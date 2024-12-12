@@ -401,16 +401,16 @@ def apply_dynamic_routing(params, selected_ports):
             - "Routing Protocol": Routing protocol to use (e.g., "OSPF", "EIGRP")
             - "Process ID": Process ID for the routing protocol (e.g., "1" for OSPF, "100" for EIGRP)
             - "Area ID": Area ID for OSPF (ignored for EIGRP)
-            - "Networks": Networks to advertise (comma-separated, e.g., "192.168.1.0 0.0.0.255,10.0.0.0 0.255.255.255")
+            - "Networks": Networks to advertise (comma-separated, e.g., "192.168.1.0/24,10.0.0.0/8")
         selected_ports (list): List of interface names to apply the dynamic routing (optional, can be empty).
 
     Returns:
         str: Generated dynamic routing configuration commands.
     """
     routing_protocol = params.get("Routing Protocol", "").strip().upper()
-    process_id = params.get("Process ID", "").strip()
-    area_id = params.get("Area ID", "").strip()
-    networks = params.get("Networks", "").strip()
+    process_id = params.get("Process ID", "")
+    area_id = params.get("Area ID", "")
+    networks = params.get("Networks", "")
 
     # Basic validation
     if not routing_protocol:
@@ -425,8 +425,6 @@ def apply_dynamic_routing(params, selected_ports):
         raise TemplateError("Routing Protocol musi być 'OSPF' lub 'EIGRP'.")
 
     # Validate Process ID
-    if not process_id.isdigit():
-        raise TemplateError("Process ID musi być liczbą całkowitą.")
     process_id_int = int(process_id)
     if not (1 <= process_id_int <= 65535):
         raise TemplateError("Process ID musi być w zakresie 1-65535.")
@@ -434,29 +432,25 @@ def apply_dynamic_routing(params, selected_ports):
     # Validate Area ID for OSPF
     if routing_protocol == "OSPF":
         if not area_id:
-            raise TemplateError("Area ID jest wymagane dla OSPF.")
-        if not area_id.isdigit():
-            raise TemplateError("Area ID dla OSPF musi być liczbą całkowitą.")
+            area_id= 0
         area_id_int = int(area_id)
         if not (0 <= area_id_int <= 65535):
             raise TemplateError("Area ID dla OSPF musi być w zakresie 0-65535.")
 
-    # Validate Networks
+    # Validate and parse Networks
     network_entries = [n.strip() for n in networks.split(",") if n.strip()]
     if not network_entries:
         raise TemplateError("Podano niepoprawne Networks.")
 
     validated_networks = []
     for entry in network_entries:
-        parts = entry.split()
-        if len(parts) != 2:
-            raise TemplateError(f"Network entry '{entry}' jest niepoprawny. Powinien mieć format 'Network Wildcard'.")
-        network, wildcard = parts
         try:
-            ipaddress.IPv4Network(f"{network}/{wildcard}", strict=False)
-            validated_networks.append(f"network {network} {wildcard}")
-        except ipaddress.NetmaskValueError:
-            raise TemplateError(f"Network '{network} {wildcard}' jest niepoprawny.")
+            # Convert CIDR to IP and wildcard mask
+            network = ipaddress.IPv4Network(entry, strict=False)
+            wildcard_mask = '.'.join(str(255 - int(octet)) for octet in network.netmask.packed)
+            validated_networks.append(f"network {network.network_address} {wildcard_mask}")
+        except (ipaddress.AddressValueError, ipaddress.NetmaskValueError):
+            raise TemplateError(f"Network '{entry}' jest niepoprawny. Użyj formatu CIDR, np. '192.168.1.0/24'.")
 
     lines = ["configure terminal"]
 
@@ -466,12 +460,12 @@ def apply_dynamic_routing(params, selected_ports):
         lines.extend(validated_networks)
     elif routing_protocol == "EIGRP":
         lines.append(f"router eigrp {process_id}")
-        lines.append(" network 0.0.0.0 255.255.255.255")  # Example configuration
         lines.extend(validated_networks)
 
     lines.append("end")
 
     return "\n".join(lines)
+
 
 def apply_dhcp_server(params, selected_ports):
     """Generuje konfigurację DHCP Server na wybranych portach."""
@@ -481,7 +475,7 @@ def apply_dhcp_server(params, selected_ports):
     subnet_mask = params.get("Subnet Mask", "").strip()
     default_router = params.get("Default Router", "").strip()
     dns_server = params.get("DNS Server", "").strip()
-    lease_time = params.get("Lease Time", "").strip()
+    lease_time = params.get("Lease Time", "")
 
     # Walidacja podstawowa
     if not pool_name:
@@ -507,6 +501,7 @@ def apply_dhcp_server(params, selected_ports):
 
     lines = [
         "configure terminal",
+        f"ip dhcp excluded-address {default_router}",
         f"ip dhcp pool {pool_name}",
         f" network {network} {subnet_mask}",
         f" default-router {default_router}"
@@ -514,28 +509,32 @@ def apply_dhcp_server(params, selected_ports):
 
     if dns_server:
         lines.append(f" dns-server {dns_server}")
-    if lease_time:
-        lines.append(f" lease {lease_time}")
+    # if lease_time:
+    #     lines.append(f" lease {lease_time}")
 
     lines.append("exit")
 
     # Opcjonalnie, dodajemy opisy do interfejsów
     for port in selected_ports:
         lines.append(f"interface {port}")
-        lines.append(f" description DHCP Server: {pool_name}")
+        lines.append(f" description DHCP Server: {default_router}")
+        lines.append(f" ip add {default_router} {subnet_mask}")
         lines.append(" no shutdown")
         lines.append("exit")
-
-    lines.append("end")
 
     return "\n".join(lines)
 
 
 def restart_router(params, selected_ports):
     lines = [
+        "!Imoportant blank line"
         "write erase",
+        " ",
         "erase startup-config",
-        "reload"
+        " ",
+        "reload",
+        "yes ",
+        " "
     ]
     return "\n".join(lines)
 
@@ -650,12 +649,9 @@ def default_interface(params, selected_ports):
     lines = ["configure terminal"]
 
     for iface in selected_ports:
-        lines.append(f"interface {iface}")
-        lines.append(" default switchport")
-        lines.append(" no shutdown")
+        lines.append(f"default interface {iface}")
         lines.append("exit")
 
-    lines.append("end")
 
     return "\n".join(lines)
 

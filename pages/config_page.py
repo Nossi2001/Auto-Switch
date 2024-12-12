@@ -3,6 +3,7 @@
 from PyQt6 import QtWidgets, QtCore, QtGui
 from PyQt6.QtCore import QRegularExpression
 from PyQt6.QtGui import QRegularExpressionValidator, QClipboard
+
 from config import Cisco_Router, Cisco_Switch, description_color
 from methods_data import methods_inputs, optional_params
 from template_logic import TEMPLATE_FUNCTIONS, TemplateError, assign_interface_labels
@@ -41,8 +42,6 @@ class ConfigPage(QtWidgets.QWidget):
         self.used_vlans = {}
         self.full_config = ""
 
-        device_data = None
-        device_label = None
         if self.device_type == 'router':
             if device_name not in Cisco_Router:
                 QtWidgets.QMessageBox.critical(self, "Error", f"Router '{device_name}' nie znaleziony.")
@@ -63,7 +62,7 @@ class ConfigPage(QtWidgets.QWidget):
         self.setup_ui_elements(device_label)
 
     def clear_layout(self, layout):
-        if layout:
+        if layout is not None:
             while layout.count():
                 item = layout.takeAt(0)
                 if item.widget():
@@ -78,11 +77,7 @@ class ConfigPage(QtWidgets.QWidget):
         header_label.setStyleSheet("font-size: 20px; font-weight: bold;")
         self.main_layout.addWidget(header_label)
 
-        device_description = ""
-        if self.device_type == 'router':
-            device_description = Cisco_Router[self.device_name]['description']
-        else:
-            device_description = Cisco_Switch[self.device_name]['description']
+        device_description = Cisco_Router[self.device_name]['description'] if self.device_type == 'router' else Cisco_Switch[self.device_name]['description']
         colors = description_color.get(device_description, {'normal': '#5F5F5F', 'hover': '#6F6F6F', 'checked': '#505358'})
 
         # Sekcja portów
@@ -193,66 +188,115 @@ class ConfigPage(QtWidgets.QWidget):
             self.params_layout.addRow(label_text + ":", widget)
             self.param_widgets[p] = widget
 
+        self.update_dynamic_fields()
+
     def create_input_widget(self, param_name, method_name):
         lower = param_name.lower()
 
-        # Walidator IP
+        # Walidatory
         ip_regex = QRegularExpression("^(25[0-5]|2[0-4]\\d|[01]?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d?\\d)){3}$")
         ip_validator = QRegularExpressionValidator(ip_regex)
 
-        # Dla Interface Role (radio button)
+        # Dla protokołów routingu
+        if "routing protocol" in lower:
+            combo = QtWidgets.QComboBox()
+            combo.addItems(["OSPF", "EIGRP"])
+            return combo
+
+        # Dla booleanów
+        if "dhcp server" in lower or "vlan routing" in lower:
+            chk = QtWidgets.QCheckBox()
+            return chk
+
         if param_name == "Interface Role":
-            # Tworzymy dwa radio buttony: Inside i Outside
-            role_group = QtWidgets.QGroupBox()
-            role_layout = QtWidgets.QHBoxLayout()
-            inside_rb = QtWidgets.QRadioButton("Inside")
-            outside_rb = QtWidgets.QRadioButton("Outside")
-            inside_rb.setChecked(True)  # domyślnie Inside
-            role_layout.addWidget(inside_rb)
-            role_layout.addWidget(outside_rb)
-            role_group.setLayout(role_layout)
-            # Zapamiętujemy referencje do radio buttonów
-            role_group.setProperty("inside_rb", inside_rb)
-            role_group.setProperty("outside_rb", outside_rb)
-            return role_group
+            combo = QtWidgets.QComboBox()
+            combo.addItems(["Inside", "Outside"])  # Dodajemy dostępne opcje
+            return combo
 
-        if "ip" in lower or "router" in lower or "dns" in lower or "network" in lower:
-            ip_line = QtWidgets.QLineEdit()
-            ip_line.setValidator(ip_validator)
-            ip_line.setPlaceholderText("np. 192.168.1.1")
-            return ip_line
+        # Dla VLAN Mode
+        if param_name == "VLAN Mode":
+            mode_group = QtWidgets.QGroupBox()
+            mode_layout = QtWidgets.QHBoxLayout()
+            static_rb = QtWidgets.QRadioButton("Static")
+            dynamic_rb = QtWidgets.QRadioButton("Dynamic")
+            static_rb.setChecked(True)
+            mode_layout.addWidget(static_rb)
+            mode_layout.addWidget(dynamic_rb)
+            mode_group.setLayout(mode_layout)
+            mode_group.setProperty("static_rb", static_rb)
+            mode_group.setProperty("dynamic_rb", dynamic_rb)
+            return mode_group
 
-        if "pool name" in lower:
-            line = QtWidgets.QLineEdit()
-            line.setPlaceholderText("Nazwa puli NAT")
-            return line
+        # Dla ID i liczb
+        if ("vlan id" in lower or "process id" in lower or "area id" in lower or
+            "voice vlan id" in lower or "native vlan id" in lower or "lease time" in lower):
+            spin = QtWidgets.QSpinBox()
+            spin.setRange(0, 65535)
+            return spin
 
-        if "pool start ip" in lower:
-            ip_line = QtWidgets.QLineEdit()
-            ip_line.setValidator(ip_validator)
-            ip_line.setPlaceholderText("np. 203.0.113.10")
-            return ip_line
-
-        if "pool end ip" in lower:
-            ip_line = QtWidgets.QLineEdit()
-            ip_line.setValidator(ip_validator)
-            ip_line.setPlaceholderText("np. 203.0.113.20")
-            return ip_line
-
-        if "access list" in lower:
-            line = QtWidgets.QLineEdit()
-            line.setPlaceholderText("np. 1 lub 100")
-            return line
-
-        if "netmask" in lower:
+        # Dla maski podsieci
+        if "subnet mask" in lower or "netmask" in lower:
             mask_line = QtWidgets.QLineEdit()
             mask_line.setValidator(ip_validator)
             mask_line.setPlaceholderText("np. 255.255.255.0")
             return mask_line
 
-        # Domyślny widget:
+        # Dla sieci (w dynamicznym routingu)
+        if param_name == "Networks":
+            txt = QtWidgets.QPlainTextEdit()
+            txt.setPlaceholderText("Wpisz sieci oddzielone średnikiem (np. 192.168.1.0/24;10.0.0.0/8).")
+            txt.setFixedHeight(60)
+            return txt
+
+        # Dla IP (Default Router, Pool Start/End IP, DNS Server)
+        if ("ip" in lower or "router" in lower or "dns" in lower or "network" in lower):
+            ip_line = QtWidgets.QLineEdit()
+            ip_line.setValidator(ip_validator)
+            ip_line.setPlaceholderText("np. 192.168.1.1")
+            return ip_line
+
+        # Dla nazw (Pool Name, Profile Name, Domain Name)
+        if "name" in lower:
+            line = QtWidgets.QLineEdit()
+            line.setPlaceholderText("Wprowadź nazwę")
+            return line
+
+        # Dla opisów
+        if "description" in lower:
+            line = QtWidgets.QLineEdit()
+            line.setPlaceholderText("Opis (opcjonalnie)")
+            return line
+
+        # Dla koloru
+        if "color" in lower:
+            btn = QtWidgets.QPushButton("Wybierz Kolor")
+            btn.clicked.connect(lambda _, b=btn: self.select_color(b))
+            return btn
+
+        # Dla Allowed VLANs lub Access List
+        if "allowed vlans" in lower or "access list" in lower:
+            line = QtWidgets.QLineEdit()
+            if "allowed vlans" in lower:
+                line.setPlaceholderText("np. 10,20,30")
+            else:
+                line.setPlaceholderText("Wpisz ACL (np. 100)")
+            return line
+
+        # Domyślnie QLineEdit
         line = QtWidgets.QLineEdit()
+        line.setPlaceholderText("Wprowadź wartość")
         return line
+
+    def select_color(self, button):
+        color = QtWidgets.QColorDialog.getColor()
+        if color.isValid():
+            hex_color = color.name()
+            button.setStyleSheet(f"background-color: {hex_color};")
+            button.setProperty("selected_color", hex_color)
+
+    def update_dynamic_fields(self):
+        # Możesz dodać dynamiczne zmiany w interfejsie w zależności od wybranej metody
+        pass
 
     def apply_configuration(self):
         selected_method = self.method_combo.currentText()
@@ -260,19 +304,26 @@ class ConfigPage(QtWidgets.QWidget):
 
         try:
             params_values = self.collect_param_values(selected_method)
-            func = TEMPLATE_FUNCTIONS.get(selected_method, None)
 
+            func = TEMPLATE_FUNCTIONS.get(selected_method, None)
             if not func:
                 QtWidgets.QMessageBox.warning(self, "Błąd", f"Brak logiki dla metody: {selected_method}")
                 return
 
-            config_text = func(params_values, selected_ports)
+            if selected_method in ["apply_data_template", "set_access_vlan", "set_trunk_vlan", "set_native_vlan"]:
+                config_text = func(params_values, selected_ports, self.used_vlans)
+            else:
+                config_text = func(params_values, selected_ports)
+
             if config_text.strip():
                 if self.full_config.strip():
                     self.full_config += "\n! --- Kolejna konfiguracja ---\n"
                 self.full_config += config_text + "\n"
 
             QtWidgets.QMessageBox.information(self, "Wygenerowana Konfiguracja", config_text)
+
+            # Aktualizacja kolorów portów i legendy VLAN
+            self.update_vlan_visuals(selected_method)  # Wywołanie aktualizacji wizualnej
 
         except TemplateError as e:
             QtWidgets.QMessageBox.warning(self, "Błąd Walidacji", str(e))
@@ -281,30 +332,38 @@ class ConfigPage(QtWidgets.QWidget):
 
     def collect_param_values(self, selected_method):
         input_params = methods_inputs.get(selected_method, [])
+        opt = optional_params.get(selected_method, [])
         params_values = {}
         for label, widget in self.param_widgets.items():
             if label == "VLAN Mode":
                 static_rb = widget.property("static_rb")
                 dynamic_rb = widget.property("dynamic_rb")
                 params_values[label] = "Static" if static_rb.isChecked() else "Dynamic"
-            elif label == "Interface Role":
-                # Pobierz wartość z radio buttonów:
-                inside_rb = widget.property("inside_rb")
-                outside_rb = widget.property("outside_rb")
-                if inside_rb.isChecked():
-                    params_values[label] = "Inside"
-                elif outside_rb.isChecked():
-                    params_values[label] = "Outside"
             elif isinstance(widget, QtWidgets.QSpinBox):
                 params_values[label] = widget.value()
             elif isinstance(widget, QtWidgets.QCheckBox):
                 params_values[label] = widget.isChecked()
             elif isinstance(widget, QtWidgets.QComboBox):
                 params_values[label] = widget.currentText()
-            elif isinstance(widget, QtWidgets.QLineEdit):
-                params_values[label] = widget.text().strip()
+            elif isinstance(widget, QtWidgets.QPushButton) and "color" in label.lower():
+                params_values[label] = widget.property("selected_color") or ""
             elif isinstance(widget, QtWidgets.QPlainTextEdit):
                 params_values[label] = widget.toPlainText().strip()
+            elif isinstance(widget, QtWidgets.QLineEdit):
+                params_values[label] = widget.text().strip()
             else:
                 params_values[label] = ""
         return params_values
+
+    def update_vlan_visuals(self, selected_method):
+        """Aktualizuje kolory przycisków portów oraz legendę VLAN."""
+        if selected_method in ["set_access_vlan", "apply_data_template", "set_trunk_vlan", "set_native_vlan"]:
+            for vlan_id, vlan_info in self.used_vlans.items():
+                # Dodaj VLAN do legendy
+                self.vlan_legend.add_vlan(vlan_id, vlan_info['name'], vlan_info['color'])
+                # Aktualizuj kolor przypisanych portów
+                for port_name, btn in self.port_buttons.items():
+                    if btn.isChecked():
+                        btn.set_color(vlan_info['color'])
+
+

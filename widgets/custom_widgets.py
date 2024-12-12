@@ -64,7 +64,7 @@ class PortButton(QtWidgets.QPushButton):
 
     def set_color(self, color):
         """Set the button color."""
-        if validate_color(color):
+        if validate_color(color):  # Sprawdzenie, czy kolor jest poprawny
             self.current_color = color
             self.hover_color = adjust_color(color, factor=0.1)
             self.checked_color = adjust_color(color, factor=0.2)
@@ -81,6 +81,7 @@ class VLANLegend(QtWidgets.QWidget):
         super().__init__(parent)
         self.layout = QtWidgets.QVBoxLayout()
         self.setLayout(self.layout)
+        self.existing_vlans = set()  # Przechowuje istniejące VLAN IDs
         self.setStyleSheet("""
             QLabel {
                 font-size: 14px;
@@ -94,6 +95,9 @@ class VLANLegend(QtWidgets.QWidget):
         """)
 
     def add_vlan(self, vlan_id, vlan_name, color):
+        if vlan_id in self.existing_vlans:
+            return  # Pomijamy powtórzenie VLAN-u
+
         vlan_widget = QtWidgets.QWidget()
         vlan_layout = QtWidgets.QHBoxLayout()
         vlan_widget.setLayout(vlan_layout)
@@ -107,9 +111,11 @@ class VLANLegend(QtWidgets.QWidget):
         vlan_layout.addWidget(text_label)
 
         self.layout.addWidget(vlan_widget)
+        self.existing_vlans.add(vlan_id)  # Dodajemy VLAN ID do istniejących
 
     def clear_legends(self):
         while self.layout.count():
             child = self.layout.takeAt(0)
             if child.widget():
                 child.widget().deleteLater()
+        self.existing_vlans.clear()  # Czyścimy istniejące VLAN IDs
