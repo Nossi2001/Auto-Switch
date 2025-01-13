@@ -4,17 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="62ecc583-8d63-460b-8300-b577ccda17fa" name="Changes" comment="Wszystko">
-      <change beforePath="$PROJECT_DIR$/.idea/Auto-Switch.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Auto-Switch.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_05_12_2024_18_35_[Changes]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_05_12_2024_18_35__Changes_.xml" beforeDir="false" />
+    <list default="true" id="62ecc583-8d63-460b-8300-b577ccda17fa" name="Changes" comment="poprawa interfejsu">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pages/config_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/pages/config_page.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pages/start_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/pages/start_page.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/styles.py" beforeDir="false" afterPath="$PROJECT_DIR$/styles.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/widgets/custom_widgets.py" beforeDir="false" afterPath="$PROJECT_DIR$/widgets/custom_widgets.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -320,7 +314,15 @@
       <option name="project" value="LOCAL" />
       <updated>1733271997991</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="poprawa interfejsu">
+      <option name="closed" value="true" />
+      <created>1736735011207</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1736735011207</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -341,6 +343,7 @@
     <MESSAGE value="edgeroutery:&#10;VLAN:&#10;&#10;Tworzenie i zarządzanie VLAN-ami.&#10;Przypisywanie VLAN-ów do interfejsów.&#10;Konfiguracja trunkingu.&#10;Backup i Restore Konfiguracji:&#10;&#10;Automatyczne tworzenie kopii zapasowych konfiguracji routera.&#10;Przywracanie konfiguracji z kopii zapasowej." />
     <MESSAGE value="lepszy main" />
     <MESSAGE value="Wszystko" />
-    <option name="LAST_COMMIT_MESSAGE" value="Wszystko" />
+    <MESSAGE value="poprawa interfejsu" />
+    <option name="LAST_COMMIT_MESSAGE" value="poprawa interfejsu" />
   </component>
 </project>

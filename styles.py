@@ -1,4 +1,15 @@
 BASE_STYLE = """
+QToolTip {
+    background-color: #2B2B2B;
+    color: #FFFFFF;
+    border: 1px solid #4CAF50;
+    border-radius: 4px;
+    padding: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    opacity: 255;
+}
+
 * {
     background-color: #2B2B2B;
     color: #E0E0E0;

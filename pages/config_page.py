@@ -14,6 +14,7 @@ class ConfigPage(QtWidgets.QWidget):
     def __init__(self, stacked_widget):
         super().__init__()
         self.stacked_widget = stacked_widget
+        self.setContentsMargins(20, 20, 20, 20)  # Add margins
         self.device_type = None
         self.device_name = None
         self.methods = []
@@ -297,7 +298,7 @@ class ConfigPage(QtWidgets.QWidget):
 
     def update_dynamic_fields(self):
         method_name = self.method_combo.currentText()
-        
+
         # Reset all port buttons to default state
         for btn in self.port_buttons.values():
             btn.setEnabled(True)
@@ -337,16 +338,17 @@ class ConfigPage(QtWidgets.QWidget):
     def update_method_description(self, method_name):
         """Updates the description label for the selected method."""
         descriptions = {
+            'apply_dynamic_routing': "Routing dynamiczny dla wybranego intrefejsu",
             'set_access_vlan': "Konfiguracja portów w trybie dostępowym VLAN",
             'apply_nat': "Konfiguracja NAT z interfejsami wewnętrznymi/zewnętrznymi",
             'apply_dhcp_server': "Konfiguracja serwera DHCP na wybranych interfejsach",
             'restart_device': "Przywracanie urządzenia do ustawień fabrycznych",
             'default_interface': "Resetowanie wybranych interfejsów do konfiguracji domyślnej"
         }
-        
+
         if hasattr(self, 'method_description_label'):
             self.method_description_label.deleteLater()
-            
+
         description = descriptions.get(method_name, "Konfiguracja wybranych interfejsów")
         self.method_description_label = QtWidgets.QLabel(description)
         self.method_description_label.setProperty("heading", "true")
