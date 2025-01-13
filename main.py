@@ -6,8 +6,12 @@ from pages.config_page import ConfigPage
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
+    
+    # Set the application-wide style sheet
+    app.setStyleSheet("QMainWindow { background-color: #2B2B2B; }")
+    
     main_window = QtWidgets.QMainWindow()
-    main_window.setWindowTitle("Network Router Configurator")
+    main_window.setWindowTitle("Konfigurator Urządzeń Sieciowych")
 
     stacked_widget = QtWidgets.QStackedWidget()
     main_window.setCentralWidget(stacked_widget)

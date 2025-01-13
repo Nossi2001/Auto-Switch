@@ -74,7 +74,8 @@ class ConfigPage(QtWidgets.QWidget):
         self.clear_layout(self.main_layout)
         header_label = QtWidgets.QLabel(f"Urządzenie: {self.device_name} ({device_label})")
         header_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        header_label.setStyleSheet("font-size: 20px; font-weight: bold;")
+        header_label.setProperty("heading", True)
+        header_label.setStyleSheet(BASE_STYLE)
         self.main_layout.addWidget(header_label)
 
         device_description = Cisco_Router[self.device_name]['description'] if self.device_type == 'router' else Cisco_Switch[self.device_name]['description']
@@ -295,8 +296,68 @@ class ConfigPage(QtWidgets.QWidget):
             button.setProperty("selected_color", hex_color)
 
     def update_dynamic_fields(self):
-        # Możesz dodać dynamiczne zmiany w interfejsie w zależności od wybranej metody
-        pass
+        method_name = self.method_combo.currentText()
+        
+        # Reset all port buttons to default state
+        for btn in self.port_buttons.values():
+            btn.setEnabled(True)
+            btn.setChecked(False)
+
+        # Method-specific behaviors
+        if method_name == 'set_access_vlan':
+            # Enable VLAN-related fields
+            for param_name, widget in self.param_widgets.items():
+                if 'vlan' in param_name.lower():
+                    widget.setEnabled(True)
+                    if isinstance(widget, QtWidgets.QLineEdit):
+                        widget.setPlaceholderText("Enter VLAN ID (1-4094)")
+
+        elif method_name == 'apply_nat':
+            # For NAT, we need at least one inside and one outside interface
+            if 'Interface Role' in self.param_widgets:
+                self.param_widgets['Interface Role'].currentTextChanged.connect(
+                    lambda: self.update_nat_interface_requirements()
+                )
+
+        elif method_name == 'apply_dhcp_server':
+            # Show DNS and lease time fields only when DHCP is enabled
+            if 'DNS Server' in self.param_widgets:
+                self.param_widgets['DNS Server'].setVisible(True)
+            if 'Lease Time' in self.param_widgets:
+                self.param_widgets['Lease Time'].setVisible(True)
+
+        elif method_name == 'restart_device':
+            # Disable all port selection for device restart
+            for btn in self.port_buttons.values():
+                btn.setEnabled(False)
+                btn.setChecked(False)
+
+        self.update_method_description(method_name)
+
+    def update_method_description(self, method_name):
+        """Updates the description label for the selected method."""
+        descriptions = {
+            'set_access_vlan': "Konfiguracja portów w trybie dostępowym VLAN",
+            'apply_nat': "Konfiguracja NAT z interfejsami wewnętrznymi/zewnętrznymi",
+            'apply_dhcp_server': "Konfiguracja serwera DHCP na wybranych interfejsach",
+            'restart_device': "Przywracanie urządzenia do ustawień fabrycznych",
+            'default_interface': "Resetowanie wybranych interfejsów do konfiguracji domyślnej"
+        }
+        
+        if hasattr(self, 'method_description_label'):
+            self.method_description_label.deleteLater()
+            
+        description = descriptions.get(method_name, "Konfiguracja wybranych interfejsów")
+        self.method_description_label = QtWidgets.QLabel(description)
+        self.method_description_label.setProperty("heading", "true")
+        self.method_description_label.setStyleSheet(BASE_STYLE)
+        self.params_layout.insertRow(0, self.method_description_label)
+
+    def update_nat_interface_requirements(self):
+        """Updates interface requirements for NAT configuration."""
+        current_role = self.param_widgets['Interface Role'].currentText()
+        for btn in self.port_buttons.values():
+            btn.setEnabled(True)
 
     def apply_configuration(self):
         selected_method = self.method_combo.currentText()
@@ -368,12 +429,20 @@ class ConfigPage(QtWidgets.QWidget):
     def update_vlan_visuals(self, selected_method):
         """Aktualizuje kolory przycisków portów oraz legendę VLAN."""
         if selected_method in ["set_access_vlan", "apply_data_template", "set_trunk_vlan", "set_native_vlan"]:
+            # Store current button states and colors
+            button_states = {btn.property("interface_name"): (btn.isChecked(), btn.vlan_color)
+                           for btn in self.port_buttons.values()}
+
             for vlan_id, vlan_info in self.used_vlans.items():
                 # Dodaj VLAN do legendy
                 self.vlan_legend.add_vlan(vlan_id, vlan_info['name'], vlan_info['color'])
                 # Aktualizuj kolor przypisanych portów
                 for port_name, btn in self.port_buttons.items():
-                    if btn.isChecked():
+                    interface_name = btn.property("interface_name")
+                    if btn.isChecked() and interface_name in button_states:
                         btn.set_color(vlan_info['color'])
-
-
+                    elif not btn.isChecked() and interface_name in button_states:
+                        # Restore previous color if unchecked
+                        prev_checked, prev_color = button_states[interface_name]
+                        if prev_color:
+                            btn.set_color(prev_color)

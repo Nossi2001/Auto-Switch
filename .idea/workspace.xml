@@ -4,10 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="62ecc583-8d63-460b-8300-b577ccda17fa" name="Changes" comment="poprawa kolorów portu(default interface, restart router zmienia kolor portów)">
+    <list default="true" id="62ecc583-8d63-460b-8300-b577ccda17fa" name="Changes" comment="Wszystko">
+      <change beforePath="$PROJECT_DIR$/.idea/Auto-Switch.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Auto-Switch.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_05_12_2024_18_35_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_05_12_2024_18_35__Changes_.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/template_logic.py" beforeDir="false" afterPath="$PROJECT_DIR$/template_logic.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pages/config_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/pages/config_page.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pages/start_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/pages/start_page.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/styles.py" beforeDir="false" afterPath="$PROJECT_DIR$/styles.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/widgets/custom_widgets.py" beforeDir="false" afterPath="$PROJECT_DIR$/widgets/custom_widgets.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -23,8 +30,19 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
-    <option name="RESET_MODE" value="HARD" />
   </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;krzysztofmarcin&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Nossi2001/Auto-Switch.git&quot;,
+    &quot;accountId&quot;: &quot;c99a414a-33d6-4aec-80f5-25f7b5ffe7e0&quot;
+  }
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 1
 }</component>
@@ -37,7 +55,6 @@
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
     &quot;Python.Auto_Finder_Router.executor&quot;: &quot;Run&quot;,
-    &quot;Python.Cisco.executor&quot;: &quot;Run&quot;,
     &quot;Python.L2_zad-1_Krypto_2024.executor&quot;: &quot;Run&quot;,
     &quot;Python.Lab_1_Krypto_2024_gr_L2_Mateusz_Nosal (1).executor&quot;: &quot;Run&quot;,
     &quot;Python.Lab_2_Krypto_2024_gr_L2_Mateusz_Nosal.executor&quot;: &quot;Run&quot;,
@@ -46,15 +63,17 @@
     &quot;Python.a.executor&quot;: &quot;Run&quot;,
     &quot;Python.main.executor&quot;: &quot;Run&quot;,
     &quot;Python.open_wrt_router.executor&quot;: &quot;Run&quot;,
+    &quot;Python.start_page.executor&quot;: &quot;Run&quot;,
     &quot;Python.tmp.executor&quot;: &quot;Run&quot;,
     &quot;Python.tmp1.executor&quot;: &quot;Run&quot;,
     &quot;Python.tmp2.executor&quot;: &quot;Run&quot;,
     &quot;Python.tmp_router.executor&quot;: &quot;Run&quot;,
     &quot;Python.tmp_testowania_nowej_konfiguracji.executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Mateusz.N/PycharmProjects/Auto-Switch/pages&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;org.jetbrains.plugins.github.ui.GithubSettingsConfigurable&quot;
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/krzys/Downloads/Codebuddy-1.4.17.zip&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
   }
 }</component>
   <component name="RecentsManager">
@@ -64,9 +83,8 @@
       <recent name="C:\Users\Mateusz.N\PycharmProjects\Auto-Switch\tmp" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Users\Mateusz.N\PycharmProjects\Auto-Switch" />
-      <recent name="C:\Users\Mateusz.N\PycharmProjects\Auto-Switch\pages" />
       <recent name="C:\Users\Mateusz.N\PycharmProjects\Auto-Switch\tmp" />
+      <recent name="C:\Users\Mateusz.N\PycharmProjects\Auto-Switch" />
     </key>
   </component>
   <component name="RunManager" selected="Python.main">
@@ -92,7 +110,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="Cisco" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="a" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Auto-Switch" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -105,7 +123,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Cisco.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/a.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -183,17 +201,17 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.main" />
-        <item itemvalue="Python.tmp" />
-        <item itemvalue="Python.Cisco" />
         <item itemvalue="Python.tmp_testowania_nowej_konfiguracji" />
         <item itemvalue="Python.Auto_Finder_Router" />
+        <item itemvalue="Python.tmp" />
+        <item itemvalue="Python.a" />
       </list>
     </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-0509580d9d50-746f403e7f0c-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-241.14494.241" />
+        <option value="bundled-python-sdk-fb887030ada0-aa17d162503b-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-243.21565.199" />
       </set>
     </attachedChunks>
   </component>
@@ -302,39 +320,7 @@
       <option name="project" value="LOCAL" />
       <updated>1733271997991</updated>
     </task>
-    <task id="LOCAL-00013" summary="Routery i switche cisco">
-      <option name="closed" value="true" />
-      <created>1733792711602</created>
-      <option name="number" value="00013" />
-      <option name="presentableId" value="LOCAL-00013" />
-      <option name="project" value="LOCAL" />
-      <updated>1733792711602</updated>
-    </task>
-    <task id="LOCAL-00014" summary="dodanie brakującego pliku config">
-      <option name="closed" value="true" />
-      <created>1733792769133</created>
-      <option name="number" value="00014" />
-      <option name="presentableId" value="LOCAL-00014" />
-      <option name="project" value="LOCAL" />
-      <updated>1733792769133</updated>
-    </task>
-    <task id="LOCAL-00015" summary="przed poprawą interfacu(należy jeszcze sprawdzić logikę na switchu)">
-      <option name="closed" value="true" />
-      <created>1734012946145</created>
-      <option name="number" value="00015" />
-      <option name="presentableId" value="LOCAL-00015" />
-      <option name="project" value="LOCAL" />
-      <updated>1734012946145</updated>
-    </task>
-    <task id="LOCAL-00016" summary="poprawa kolorów portu(default interface, restart router zmienia kolor portów)">
-      <option name="closed" value="true" />
-      <created>1734017622806</created>
-      <option name="number" value="00016" />
-      <option name="presentableId" value="LOCAL-00016" />
-      <option name="project" value="LOCAL" />
-      <updated>1734017622806</updated>
-    </task>
-    <option name="localTasksCounter" value="17" />
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -355,10 +341,6 @@
     <MESSAGE value="edgeroutery:&#10;VLAN:&#10;&#10;Tworzenie i zarządzanie VLAN-ami.&#10;Przypisywanie VLAN-ów do interfejsów.&#10;Konfiguracja trunkingu.&#10;Backup i Restore Konfiguracji:&#10;&#10;Automatyczne tworzenie kopii zapasowych konfiguracji routera.&#10;Przywracanie konfiguracji z kopii zapasowej." />
     <MESSAGE value="lepszy main" />
     <MESSAGE value="Wszystko" />
-    <MESSAGE value="Routery i switche cisco" />
-    <MESSAGE value="dodanie brakującego pliku config" />
-    <MESSAGE value="przed poprawą interfacu(należy jeszcze sprawdzić logikę na switchu)" />
-    <MESSAGE value="poprawa kolorów portu(default interface, restart router zmienia kolor portów)" />
-    <option name="LAST_COMMIT_MESSAGE" value="poprawa kolorów portu(default interface, restart router zmienia kolor portów)" />
+    <option name="LAST_COMMIT_MESSAGE" value="Wszystko" />
   </component>
 </project>

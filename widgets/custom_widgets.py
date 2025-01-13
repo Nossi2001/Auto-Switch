@@ -1,6 +1,7 @@
 # widgets/custom_widgets.py
 
 from PyQt6 import QtWidgets
+from PyQt6 import QtGui
 from PyQt6.QtGui import QColor
 
 def adjust_color(hex_color, factor=0.1):
@@ -33,38 +34,42 @@ def validate_color(c):
 class PortButton(QtWidgets.QPushButton):
     def __init__(self, label=''):
         super().__init__(label)
+        self.vlan_color = None  # Store the VLAN color
+        self.setFixedSize(100, 40)
         self.setCheckable(True)
         self.current_color = '#5F5F5F'
+        self.background_color = '#5F5F5F'
         self.hover_color = adjust_color(self.current_color, factor=0.1)
         self.checked_color = adjust_color(self.current_color, factor=0.2)
+        self.setFont(QtGui.QFont('Segoe UI', 10))
         self.update_style()
-
-        # Change color on hover
-        self.setMouseTracking(True)
-        self.enterEvent = self.on_hover_enter
-        self.leaveEvent = self.on_hover_leave
 
     def update_style(self):
         self.setStyleSheet(f"""
             QPushButton {{
-                background-color: {self.current_color};
-                border: 2px solid #9E9E9E;
-                border-radius: 5px;
-                color: #FFFFFF;
+                border: 2px solid #3D3D3D;
+                background-color: {self.background_color};
+                border-radius: 4px;
+                color: white;
+                padding: 4px;
+                font-weight: bold;
             }}
             QPushButton:hover {{
                 background-color: {self.hover_color};
-                border-color: #4CAF50;
+                border: 2px solid #4CAF50;
             }}
             QPushButton:checked {{
                 background-color: {self.checked_color};
-                border-color: #388E3C;
+                border: 3px solid #4CAF50;
+                font-weight: bold;
             }}
         """)
 
     def set_color(self, color):
         """Set the button color."""
-        if validate_color(color):  # Sprawdzenie, czy kolor jest poprawny
+        if validate_color(color):  # Check if the color is valid
+            self.vlan_color = color  # Store the VLAN color
+            self.background_color = color
             self.current_color = color
             self.hover_color = adjust_color(color, factor=0.1)
             self.checked_color = adjust_color(color, factor=0.2)
@@ -79,27 +84,34 @@ class PortButton(QtWidgets.QPushButton):
 class VLANLegend(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.layout = QtWidgets.QVBoxLayout()
-        self.setLayout(self.layout)
-        self.existing_vlans = set()  # Przechowuje istniejące VLAN IDs
+        self.grid_layout = QtWidgets.QGridLayout()
+        self.setLayout(self.grid_layout)
+        self.existing_vlans = set()  # Stores existing VLAN IDs
+        self.current_row = 0
+        self.current_col = 0
         self.setStyleSheet("""
             QLabel {
-                font-size: 14px;
-                color: #FFFFFF;
+                font-size: 12px;
+                color: #E0E0E0;
+                padding: 2px;
+                margin: 1px;
             }
             QWidget {
-                background-color: #3C3C3C;
-                border: 1px solid #9E9E9E;
-                border-radius: 5px;
+                background-color: #2B2B2B;
+                border: 1px solid #3D3D3D;
+                border-radius: 6px;
+                padding: 4px;
             }
         """)
 
     def add_vlan(self, vlan_id, vlan_name, color):
         if vlan_id in self.existing_vlans:
-            return  # Pomijamy powtórzenie VLAN-u
+            return  # Skip duplicate VLAN
 
         vlan_widget = QtWidgets.QWidget()
-        vlan_layout = QtWidgets.QHBoxLayout()
+        vlan_layout = QtWidgets.QHBoxLayout(vlan_widget)
+        vlan_layout.setContentsMargins(2, 2, 2, 2)
+        vlan_layout.setSpacing(4)
         vlan_widget.setLayout(vlan_layout)
 
         color_label = QtWidgets.QLabel("   ")
@@ -110,12 +122,20 @@ class VLANLegend(QtWidgets.QWidget):
         text_label = QtWidgets.QLabel(f" VLAN {vlan_id}: {vlan_name}")
         vlan_layout.addWidget(text_label)
 
-        self.layout.addWidget(vlan_widget)
-        self.existing_vlans.add(vlan_id)  # Dodajemy VLAN ID do istniejących
+        # Add to grid layout with 4 columns
+        self.grid_layout.addWidget(vlan_widget, self.current_row, self.current_col)
+        self.current_col += 1
+        if self.current_col >= 4:
+            self.current_col = 0
+            self.current_row += 1
+
+        self.existing_vlans.add(vlan_id)  # Add VLAN ID to existing
 
     def clear_legends(self):
-        while self.layout.count():
-            child = self.layout.takeAt(0)
+        while self.grid_layout.count():
+            child = self.grid_layout.takeAt(0)
             if child.widget():
                 child.widget().deleteLater()
-        self.existing_vlans.clear()  # Czyścimy istniejące VLAN IDs
+        self.existing_vlans.clear()  # Clear existing VLAN IDs
+        self.current_row = 0
+        self.current_col = 0

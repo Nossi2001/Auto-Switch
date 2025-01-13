@@ -1,6 +1,6 @@
 from PyQt6 import QtWidgets, QtCore
 from config import Cisco_Router, Cisco_Switch
-from styles import BASE_STYLE
+from styles import BASE_STYLE, GROUPBOX_STYLE
 
 class StartPage(QtWidgets.QWidget):
     def __init__(self, stacked_widget):
@@ -18,7 +18,8 @@ class StartPage(QtWidgets.QWidget):
         layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
         title_label = QtWidgets.QLabel("Wybierz typ urządzenia i model")
-        title_label.setStyleSheet("font-size:20px;font-weight:bold;")
+        title_label.setProperty("heading", "true")  # Changed to string "true"
+        title_label.setStyleSheet(BASE_STYLE)
         title_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(title_label)
 
@@ -36,6 +37,7 @@ class StartPage(QtWidgets.QWidget):
         self.device_group = QtWidgets.QGroupBox("Urządzenia")
         self.device_layout = QtWidgets.QVBoxLayout()
         self.device_group.setLayout(self.device_layout)
+        self.device_group.setStyleSheet(GROUPBOX_STYLE)
         layout.addWidget(self.device_group)
 
         self.load_devices()
