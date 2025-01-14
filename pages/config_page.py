@@ -247,7 +247,7 @@ class ConfigPage(QtWidgets.QWidget):
         if param_name == "Networks":
             txt = QtWidgets.QPlainTextEdit()
             txt.setPlaceholderText("Wpisz sieci oddzielone średnikiem (np. 192.168.1.0/24;10.0.0.0/8).")
-            txt.setFixedHeight(60)
+
             return txt
 
         # Dla IP (Default Router, Pool Start/End IP, DNS Server)
