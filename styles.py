@@ -144,3 +144,68 @@ QPlainTextEdit {
 """
 
 LABEL_STYLE = "QLabel { font-size: 16px; color: #FFFFFF; }"
+
+BASE_STYLE += """
+QScrollBar:vertical {
+    border: none;
+    background: #2B2B2B;
+    width: 14px;
+    margin: 0px 0px 0px 0px;
+}
+
+QScrollBar::handle:vertical {
+    background: #3D3D3D;
+    min-height: 30px;
+    border-radius: 7px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: #4D4D4D;
+}
+
+QScrollBar::add-line:vertical {
+    height: 0px;
+}
+
+QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+    background: none;
+}
+
+QScrollBar:horizontal {
+    border: none;
+    background: #2B2B2B;
+    height: 14px;
+    margin: 0px 0px 0px 0px;
+}
+
+QScrollBar::handle:horizontal {
+    background: #3D3D3D;
+    min-width: 30px;
+    border-radius: 7px;
+}
+
+QScrollBar::handle:horizontal:hover {
+    background: #4D4D4D;
+}
+
+QScrollBar::add-line:horizontal {
+    width: 0px;
+}
+
+QScrollBar::sub-line:horizontal {
+    width: 0px;
+}
+
+QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+    background: none;
+}
+
+QScrollArea {
+    border: none;
+    background: transparent;
+}
+"""

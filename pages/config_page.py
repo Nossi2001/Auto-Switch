@@ -14,7 +14,31 @@ class ConfigPage(QtWidgets.QWidget):
     def __init__(self, stacked_widget):
         super().__init__()
         self.stacked_widget = stacked_widget
-        self.setContentsMargins(20, 20, 20, 20)  # Add margins
+        
+        # Create a scroll area
+        scroll = QtWidgets.QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        scroll.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        
+        # Create a container widget for the scroll area
+        self.scroll_content = QtWidgets.QWidget()
+        self.main_layout = QtWidgets.QVBoxLayout(self.scroll_content)
+        self.main_layout.setContentsMargins(20, 20, 20, 20)
+        
+        # Add initial placeholder
+        placeholder_label = QtWidgets.QLabel("Proszę wybrać urządzenie na poprzedniej stronie...")
+        placeholder_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.main_layout.addWidget(placeholder_label)
+        
+        # Set the scroll content
+        scroll.setWidget(self.scroll_content)
+        
+        # Create main layout for the page
+        layout = QtWidgets.QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(scroll)
+
         self.device_type = None
         self.device_name = None
         self.methods = []
@@ -25,12 +49,6 @@ class ConfigPage(QtWidgets.QWidget):
         self.full_config = ""
 
         self.setStyleSheet(BASE_STYLE + GROUPBOX_STYLE + LABEL_STYLE)
-
-        self.main_layout = QtWidgets.QVBoxLayout()
-        placeholder_label = QtWidgets.QLabel("Proszę wybrać urządzenie na poprzedniej stronie...")
-        placeholder_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        self.main_layout.addWidget(placeholder_label)
-        self.setLayout(self.main_layout)
 
         self.params_group = None
         self.params_layout = None
@@ -182,15 +200,82 @@ class ConfigPage(QtWidgets.QWidget):
         input_params = methods_inputs.get(method_name, [])
         opt = optional_params.get(method_name, [])
 
-        for p in input_params:
-            label_text = p
-            if p in opt:
-                label_text += " (opcjonalne)"
-            widget = self.create_input_widget(p, method_name)
-            self.params_layout.addRow(label_text + ":", widget)
-            self.param_widgets[p] = widget
+        # Special handling for dynamic routing networks
+        if method_name == 'apply_dynamic_routing':
+            # Add non-network parameters first
+            for p in ["Routing Protocol", "Process ID", "Area ID"]:
+                if p in input_params:  # Check if parameter exists in input_params
+                    label_text = p
+                    if p in opt:
+                        label_text += " (opcjonalne)"
+                    widget = self.create_input_widget(p, method_name)
+                    self.params_layout.addRow(label_text + ":", widget)
+                    self.param_widgets[p] = widget
+
+            # Add first network field
+            widget = self.create_input_widget("Network 1", method_name)
+            self.params_layout.addRow("Network 1:", widget)
+            self.param_widgets["Network 1"] = widget
+
+            # Add first netmask field
+            widget = self.create_input_widget("Netmask 1", method_name)
+            self.params_layout.addRow("Netmask 1:", widget)
+            self.param_widgets["Netmask 1"] = widget
+
+            # Add the "Add Network" button
+            add_network_btn = QtWidgets.QPushButton("+ Dodaj sieć")
+            add_network_btn.setStyleSheet("""
+                QPushButton {
+                    background-color: #3D3D3D;
+                    border: 2px solid #3D3D3D;
+                    border-radius: 4px;
+                    color: #FFFFFF;
+                    font-size: 14px;
+                    padding: 8px 16px;
+                    min-height: 20px;
+                }
+                QPushButton:hover {
+                    background-color: #4D4D4D;
+                    border: 2px solid #4CAF50;
+                }
+                QPushButton:pressed {
+                    background-color: #4CAF50;
+                }
+            """)
+            add_network_btn.clicked.connect(self.add_network_field)
+            self.params_layout.addRow("", add_network_btn)
+
+        else:
+            # Standard handling for other methods
+            for p in input_params:
+                label_text = p
+                if p in opt:
+                    label_text += " (opcjonalne)"
+                widget = self.create_input_widget(p, method_name)
+                self.params_layout.addRow(label_text + ":", widget)
+                self.param_widgets[p] = widget
 
         self.update_dynamic_fields()
+
+    def add_network_field(self):
+        """Add a new network input field."""
+        current_count = len([w for w in self.param_widgets.keys() if w.startswith("Network")])
+        if current_count < 4:  # Limit to 4 networks
+            new_network_num = current_count + 1
+            widget = self.create_input_widget(f"Network {new_network_num}", self.method_combo.currentText())
+            self.param_widgets[f"Network {new_network_num}"] = widget
+            self.params_layout.insertRow(self.params_layout.rowCount() - 1,  # Insert before the add button
+                                       f"Network {new_network_num}:",
+                                       widget)
+
+            # Add corresponding netmask field
+            widget = self.create_input_widget(f"Netmask {new_network_num}", self.method_combo.currentText())
+            self.param_widgets[f"Netmask {new_network_num}"] = widget
+            self.params_layout.insertRow(self.params_layout.rowCount() - 1,  # Insert before the add button
+                                       f"Netmask {new_network_num}:",
+                                       widget)
+        else:
+            QtWidgets.QMessageBox.information(self, "Limit osiągnięty", "Osiągnięto maksymalną ilość sieci")
 
     def create_input_widget(self, param_name, method_name):
         lower = param_name.lower()
@@ -198,6 +283,20 @@ class ConfigPage(QtWidgets.QWidget):
         # Walidatory
         ip_regex = QRegularExpression("^(25[0-5]|2[0-4]\\d|[01]?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d?\\d)){3}$")
         ip_validator = QRegularExpressionValidator(ip_regex)
+
+        # Special handling for Network fields in dynamic routing
+        if param_name.startswith("Network"):
+            ip_line = QtWidgets.QLineEdit()
+            ip_line.setValidator(ip_validator)
+            ip_line.setPlaceholderText("np. 192.168.1.0")
+            return ip_line
+
+        # Dla IP (Default Router, Pool Start/End IP, DNS Server)
+        if ("ip" in lower or "router" in lower or "dns" in lower or "network" in lower):
+            ip_line = QtWidgets.QLineEdit()
+            ip_line.setValidator(ip_validator)
+            ip_line.setPlaceholderText("np. 192.168.1.1")
+            return ip_line
 
         # Dla protokołów routingu
         if "routing protocol" in lower:
@@ -229,11 +328,82 @@ class ConfigPage(QtWidgets.QWidget):
             mode_group.setProperty("dynamic_rb", dynamic_rb)
             return mode_group
 
-        # Dla ID i liczb
+        # Enhanced numerical inputs
         if ("vlan id" in lower or "process id" in lower or "area id" in lower or
             "voice vlan id" in lower or "native vlan id" in lower or "lease time" in lower):
             spin = QtWidgets.QSpinBox()
-            spin.setRange(0, 65535)
+            
+            # Set range and prefix based on parameter type
+            if "vlan" in lower:
+                spin.setRange(1, 4094)
+                spin.setPrefix("VLAN ")
+            elif "process id" in lower:
+                spin.setRange(1, 65535)
+                spin.setPrefix("PID ")
+            elif "area id" in lower:
+                spin.setRange(0, 65535)
+                spin.setPrefix("Area ")
+            elif "lease time" in lower:
+                spin.setRange(1, 365)
+                spin.setSuffix(" days")
+            else:
+                spin.setRange(0, 65535)
+
+            # Common styling for all numerical inputs
+            spin.setStyleSheet("""
+                QSpinBox {
+                    background-color: #3D3D3D;
+                    border: 2px solid #3D3D3D;
+                    border-radius: 4px;
+                    color: #FFFFFF;
+                    padding: 5px;
+                    min-width: 100px;
+                    min-height: 30px;
+                    height: 30px;
+                }
+                QSpinBox:hover {
+                    border: 2px solid #4CAF50;
+                }
+                QSpinBox:focus {
+                    border: 2px solid #4CAF50;
+                    background-color: #454545;
+                }
+                QSpinBox::up-button, QSpinBox::down-button {
+                    background-color: #4D4D4D;
+                    border: none;
+                    border-radius: 2px;
+                    margin: 1px;
+                    width: 20px;
+                    height: 15px;
+                }
+                QSpinBox::up-button:hover, QSpinBox::down-button:hover {
+                    background-color: #5D5D5D;
+                }
+                QSpinBox::up-button:pressed, QSpinBox::down-button:pressed {
+                    background-color: #4CAF50;
+                }
+                QSpinBox::up-arrow {
+                    width: 7px;
+                    height: 7px;
+                    border-left: 2px solid white;
+                    border-top: 2px solid white;
+                    transform: rotate(45deg);
+                }
+                QSpinBox::down-arrow {
+                    width: 7px;
+                    height: 7px;
+                    border-left: 2px solid white;
+                    border-bottom: 2px solid white;
+                    transform: rotate(-45deg);
+                }
+            """)
+            
+            spin.setButtonSymbols(QtWidgets.QAbstractSpinBox.ButtonSymbols.UpDownArrows)
+            spin.setAccelerated(True)
+            spin.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            spin.setFixedHeight(30)  # Set fixed height to match other elements
+            spin.setMinimumWidth(150)  # Ensure minimum width
+            
             return spin
 
         # Dla maski podsieci
@@ -241,21 +411,9 @@ class ConfigPage(QtWidgets.QWidget):
             mask_line = QtWidgets.QLineEdit()
             mask_line.setValidator(ip_validator)
             mask_line.setPlaceholderText("np. 255.255.255.0")
+            if "netmask" in lower:  # Explicit handling for netmask field
+                mask_line.setPlaceholderText("np. 255.255.255.0 (netmask)")
             return mask_line
-
-        # Dla sieci (w dynamicznym routingu)
-        if param_name == "Networks":
-            txt = QtWidgets.QPlainTextEdit()
-            txt.setPlaceholderText("Wpisz sieci oddzielone średnikiem (np. 192.168.1.0/24;10.0.0.0/8).")
-
-            return txt
-
-        # Dla IP (Default Router, Pool Start/End IP, DNS Server)
-        if ("ip" in lower or "router" in lower or "dns" in lower or "network" in lower):
-            ip_line = QtWidgets.QLineEdit()
-            ip_line.setValidator(ip_validator)
-            ip_line.setPlaceholderText("np. 192.168.1.1")
-            return ip_line
 
         # Dla nazw (Pool Name, Profile Name, Domain Name)
         if "name" in lower:
@@ -407,12 +565,10 @@ class ConfigPage(QtWidgets.QWidget):
         input_params = methods_inputs.get(selected_method, [])
         opt = optional_params.get(selected_method, [])
         params_values = {}
+
+        # Collect all widget values
         for label, widget in self.param_widgets.items():
-            if label == "VLAN Mode":
-                static_rb = widget.property("static_rb")
-                dynamic_rb = widget.property("dynamic_rb")
-                params_values[label] = "Static" if static_rb.isChecked() else "Dynamic"
-            elif isinstance(widget, QtWidgets.QSpinBox):
+            if isinstance(widget, QtWidgets.QSpinBox):
                 params_values[label] = widget.value()
             elif isinstance(widget, QtWidgets.QCheckBox):
                 params_values[label] = widget.isChecked()
@@ -426,6 +582,7 @@ class ConfigPage(QtWidgets.QWidget):
                 params_values[label] = widget.text().strip()
             else:
                 params_values[label] = ""
+
         return params_values
 
     def update_vlan_visuals(self, selected_method):

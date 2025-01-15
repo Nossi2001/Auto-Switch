@@ -26,9 +26,17 @@ class StartPage(QtWidgets.QWidget):
         self.init_ui()
 
     def init_ui(self):
-        layout = QtWidgets.QVBoxLayout()
+        # Create a scroll area
+        scroll = QtWidgets.QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        scroll.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        
+        # Create a container widget for the scroll area
+        scroll_content = QtWidgets.QWidget()
+        layout = QtWidgets.QVBoxLayout(scroll_content)
         layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        layout.setContentsMargins(20, 20, 20, 20)  # Add margins
+        layout.setContentsMargins(20, 20, 20, 20)
 
         title_label = QtWidgets.QLabel("Wybierz typ urządzenia i model")
         title_label.setProperty("heading", "true")
@@ -59,7 +67,13 @@ class StartPage(QtWidgets.QWidget):
         next_button.clicked.connect(self.go_next)
         layout.addWidget(next_button)
 
-        self.setLayout(layout)
+        # Set the scroll content
+        scroll.setWidget(scroll_content)
+        
+        # Create main layout for the page
+        main_layout = QtWidgets.QVBoxLayout(self)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.addWidget(scroll)
 
     def on_type_change(self):
         if self.sender() == self.router_radio:

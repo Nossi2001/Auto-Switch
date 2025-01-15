@@ -215,8 +215,6 @@ def set_trunk_vlan(params, selected_ports, used_vlans=None):
     if used_vlans is None:
         used_vlans = {}
 
-
-
     lines = ["configure terminal"]
 
     # Upewnienie się, że VLANy istnieją
@@ -417,10 +415,17 @@ def apply_dynamic_routing(params, selected_ports):
     Parameters:
         params (dict): Dictionary containing configuration parameters.
             - "Routing Protocol": Routing protocol to use (e.g., "OSPF", "EIGRP")
-            - "Process ID": Process ID for the routing protocol (e.g., "1" for OSPF, "100" for EIGRP)
+            - "Process ID": Process ID for the routing protocol
             - "Area ID": Area ID for OSPF (ignored for EIGRP)
-            - "Networks": Networks to advertise (comma-separated, e.g., "192.168.1.0/24,10.0.0.0/8")
-        selected_ports (list): List of interface names to apply the dynamic routing (optional, can be empty).
+            - "Network 1": First network to advertise
+            - "Netmask 1": Netmask for first network
+            - "Network 2": Second network to advertise (optional)
+            - "Netmask 2": Netmask for second network (optional)
+            - "Network 3": Third network to advertise (optional)
+            - "Netmask 3": Netmask for third network (optional)
+            - "Network 4": Fourth network to advertise (optional)
+            - "Netmask 4": Netmask for fourth network (optional)
+        selected_ports (list): List of interface names to apply the dynamic routing.
 
     Returns:
         str: Generated dynamic routing configuration commands.
@@ -428,15 +433,12 @@ def apply_dynamic_routing(params, selected_ports):
     routing_protocol = params.get("Routing Protocol", "").strip().upper()
     process_id = params.get("Process ID", "")
     area_id = params.get("Area ID", "")
-    networks = params.get("Networks", "")
 
     # Basic validation
     if not routing_protocol:
         raise TemplateError("Routing Protocol jest wymagany.")
     if not process_id:
         raise TemplateError("Process ID jest wymagany.")
-    if not networks:
-        raise TemplateError("Networks są wymagane.")
 
     # Validate Routing Protocol
     if routing_protocol not in ("OSPF", "EIGRP"):
@@ -450,25 +452,33 @@ def apply_dynamic_routing(params, selected_ports):
     # Validate Area ID for OSPF
     if routing_protocol == "OSPF":
         if not area_id:
-            area_id= 0
+            area_id = 0
         area_id_int = int(area_id)
         if not (0 <= area_id_int <= 65535):
             raise TemplateError("Area ID dla OSPF musi być w zakresie 0-65535.")
 
-    # Validate and parse Networks
-    network_entries = [n.strip() for n in networks.split(",") if n.strip()]
-    if not network_entries:
-        raise TemplateError("Podano niepoprawne Networks.")
-
+    # Collect and validate networks
     validated_networks = []
-    for entry in network_entries:
-        try:
-            # Convert CIDR to IP and wildcard mask
-            network = ipaddress.IPv4Network(entry, strict=False)
-            wildcard_mask = '.'.join(str(255 - int(octet)) for octet in network.netmask.packed)
-            validated_networks.append(f"network {network.network_address} {wildcard_mask}")
-        except (ipaddress.AddressValueError, ipaddress.NetmaskValueError):
-            raise TemplateError(f"Network '{entry}' jest niepoprawny. Użyj formatu CIDR, np. '192.168.1.0/24'.")
+    for i in range(1, 5):  # Check all 4 possible network fields
+        network = params.get(f"Network {i}", "").strip()
+        netmask = params.get(f"Netmask {i}", "").strip()
+
+        if network and netmask:  # Only process when both network and netmask are provided
+            try:
+                # Validate network address
+                network_addr = ipaddress.IPv4Address(network)
+                # Validate netmask
+                netmask_addr = ipaddress.IPv4Address(netmask)
+                # Calculate wildcard mask correctly
+                netmask_octets = [int(octet) for octet in netmask.split('.')]
+                wildcard_octets = [str(255 - octet) for octet in netmask_octets]
+                wildcard_mask = '.'.join(wildcard_octets)
+                validated_networks.append(f"network {network} {wildcard_mask}")
+            except (ipaddress.AddressValueError, ValueError):
+                raise TemplateError(f"Network '{network}' lub Netmask '{netmask}' jest niepoprawny.")
+
+    if not validated_networks:
+        raise TemplateError("Co najmniej jedna sieć z maską musi być skonfigurowana.")
 
     lines = ["configure terminal"]
 
@@ -515,7 +525,6 @@ def apply_dhcp_server(params, selected_ports):
         lease_time_value = int(lease_time)
         if lease_time_value <= 0:
             raise TemplateError("Lease Time musi być większy od zera.")
-
 
     lines = [
         "configure terminal",
@@ -670,8 +679,6 @@ def default_interface(params, selected_ports):
     for iface in selected_ports:
         lines.append(f"default interface {iface}")
         lines.append("exit")
-
-
 
     return "\n".join(lines)
 

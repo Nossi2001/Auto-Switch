@@ -3,7 +3,13 @@
 methods_inputs = {
     'apply_data_template': ["VLAN ID", "Profile Name", "Color", "VLAN Routing", "VLAN Mode", "VLAN IP Address", "Subnet Mask", "DHCP Server", "start", "stop"],
     'apply_static_routing': ["Destination Network", "Subnet Mask", "Next Hop IP"],
-    'apply_dynamic_routing': ["Routing Protocol", "Process ID", "Area ID", "Networks"],
+    'apply_dynamic_routing': [
+        "Routing Protocol",
+        "Process ID",
+        "Area ID",
+        "Network 1",
+        "Netmask 1"
+    ],
     'apply_nat': ["Interface Role", "Pool Name", "Pool Start IP", "Pool End IP", "Access List", "Netmask"],
     'apply_dhcp_server': ["Pool Name", "Network", "Subnet Mask", "Default Router", "DNS Server", "Lease Time"],
     'apply_config': [],
@@ -26,7 +32,7 @@ methods_inputs = {
 optional_params = {
     'apply_data_template': ["Color", "DHCP Server", "start", "stop"],
     'apply_static_routing': [],
-    'apply_dynamic_routing': ["Area ID"],
+    'apply_dynamic_routing': ["Area ID", "Network 2", "Netmask 2", "Network 3", "Netmask 3", "Network 4", "Netmask 4"],
     'apply_nat': [],
     'apply_dhcp_server': ["DNS Server", "Lease Time"],
     'apply_config': [],
