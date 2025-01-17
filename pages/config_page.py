@@ -59,7 +59,7 @@ class ConfigPage(QtWidgets.QWidget):
         self.device_type = device_type
         self.device_name = device_name
         self.used_vlans = {}
-        self.full_config = ""
+        self.full_config = "enable\n"
 
         if self.device_type == 'router':
             if device_name not in Cisco_Router:

@@ -54,49 +54,43 @@ def apply_data_template(params, selected_ports, used_vlans=None):
     if used_vlans is None:
         used_vlans = {}
 
+    # Pobieranie i walidacja VLAN ID
     vlan_id = params.get("VLAN ID")
     if not vlan_id or not isinstance(vlan_id, int):
-        raise TemplateError("VLAN ID jest wymagany i musi być liczbą.")
+        raise TemplateError("VLAN ID jest wymagany i musi być liczbą całkowitą.")
     if vlan_id < 1 or vlan_id > 4094:
         raise TemplateError("VLAN ID musi być w zakresie 1-4094.")
 
     if vlan_id in used_vlans:
         raise TemplateError(f"VLAN ID {vlan_id} jest już w użyciu.")
 
+    # Pobieranie nazwy profilu
     profile_name = params.get("Profile Name", "").strip()
     if not profile_name:
         raise TemplateError("Profile Name jest wymagane.")
 
+    # Walidacja koloru
     color = params.get("Color", "").strip()
     if color and not validate_color(color):
         color = "#5F5F5F"
     elif not color:
         color = "#5F5F5F"
 
+    # Pobieranie i walidacja parametrów routingu
     vlan_routing = params.get("VLAN Routing", False)
     vlan_mode = params.get("VLAN Mode", "Static")
     vlan_ip = params.get("VLAN IP Address", "").strip()
     subnet_mask = params.get("Subnet Mask", "").strip()
+
+    if vlan_routing and vlan_mode == "Static":
+        if not vlan_ip or not subnet_mask:
+            raise TemplateError("Dla statycznego routingu VLAN wymagane są VLAN IP Address i Subnet Mask.")
+
+    # Walidacja parametrów DHCP
     dhcp_server = params.get("DHCP Server", False)
     start = params.get("start", "").strip()
     stop = params.get("stop", "").strip()
 
-    # Budowa konfiguracji VLAN
-    lines = ["configure terminal",
-             f"vlan {vlan_id}",
-             f" name {profile_name}",
-             "exit"]
-
-    # Routing VLAN jeśli wymagany i statyczny
-    if vlan_routing and vlan_mode == "Static":
-        if not vlan_ip or not subnet_mask:
-            raise TemplateError("Dla statycznego routingu VLAN wymagane są VLAN IP Address i Subnet Mask.")
-        lines.append(f"interface vlan {vlan_id}")
-        lines.append(f" ip address {vlan_ip} {subnet_mask}")
-        lines.append(" no shutdown")
-        lines.append("exit")
-
-    # DHCP jeśli zaznaczono
     if dhcp_server:
         if not vlan_ip or not subnet_mask:
             raise TemplateError("Dla DHCP Server wymagane są VLAN IP Address i Subnet Mask.")
@@ -104,32 +98,57 @@ def apply_data_template(params, selected_ports, used_vlans=None):
             raise TemplateError("Dla DHCP Server wymagane są parametry start i stop.")
         if not start.isdigit() or not stop.isdigit():
             raise TemplateError("Lease Time (start/stop) musi być liczbą całkowitą.")
+
+    # Tworzenie konfiguracji VLAN
+    lines = [
+        "configure terminal",
+        f"vlan {vlan_id}",
+        f" name {profile_name}",
+        "exit"
+    ]
+
+    # Tworzenie interfejsu VLAN
+    lines.append(f"interface vlan {vlan_id}")
+    if vlan_ip and subnet_mask:
+        lines.append(f" ip address {vlan_ip} {subnet_mask}")
+    else:
+        lines.append(f" description VLAN{vlan_id} - no IP assigned")
+    lines.append(" no shutdown")
+    lines.append("exit")
+
+    # Konfiguracja DHCP jeśli włączone
+    if dhcp_server:
+        try:
+            network = ipaddress.IPv4Network(f"{vlan_ip}/{subnet_mask}", strict=False)
+        except ValueError:
+            raise TemplateError("Nieprawidłowy VLAN IP Address lub Subnet Mask.")
+
         lease_start = int(start)
         lease_stop = int(stop)
-        lines.append(f"ip dhcp pool {profile_name}_pool")
-        lines.append(f" network {vlan_ip} {subnet_mask}")
-        lines.append(f" default-router {vlan_ip}")
-        lines.append(" dns-server 8.8.8.8")
-        lines.append(f" lease {lease_start} {lease_stop}")
-        lines.append("exit")
+        lines.extend([
+            f"ip dhcp pool {profile_name}_pool",
+            f" network {network.network_address} {subnet_mask}",
+            f" default-router {vlan_ip}",
+            " dns-server 8.8.8.8",
+            f" lease {lease_start} {lease_stop}",
+            "exit"
+        ])
 
     # Przypisanie VLAN do portów
     for p in selected_ports:
-        lines.append(f"interface {p}")
-        if vlan_routing:
-            lines.append(f" description {profile_name} (Routing)")
-        elif dhcp_server:
-            lines.append(f" description {profile_name} (DHCP)")
-        else:
-            lines.append(f" description {profile_name}")
-        lines.append(" switchport mode access")
-        lines.append(f" switchport access vlan {vlan_id}")
-        lines.append(" no shutdown")
-        lines.append("exit")
+        lines.extend([
+            f"interface {p}",
+            f" description {profile_name} ({'Routing' if vlan_routing else 'DHCP' if dhcp_server else 'Access'})",
+            " switchport mode access",
+            f" switchport access vlan {vlan_id}",
+            " no shutdown",
+            "exit"
+        ])
 
-    lines.append("end")
+    # Wyjście z konfiguracji terminala
+    lines.append("exit")
 
-    # Zapis do used_vlans
+    # Aktualizacja używanych VLAN-ów
     used_vlans[vlan_id] = {
         'name': profile_name,
         'color': color,
@@ -138,6 +157,10 @@ def apply_data_template(params, selected_ports, used_vlans=None):
     }
 
     return "\n".join(lines)
+
+
+
+
 
 
 def set_access_vlan(params, selected_ports, used_vlans=None):
@@ -182,7 +205,6 @@ def set_access_vlan(params, selected_ports, used_vlans=None):
         lines.append(" no shutdown")
         lines.append("exit")
 
-    lines.append("end")
 
     return "\n".join(lines)
 
@@ -204,36 +226,28 @@ def set_trunk_vlan(params, selected_ports, used_vlans=None):
 
     allowed_vlans_out = ",".join(allowed_vlans)
 
-    # Sprawdzenie, czy którykolwiek z VLANów jest już używany
-    for vid_str in allowed_vlans:
-        vid = int(vid_str)
-        if vid in used_vlans:
-            raise TemplateError(f"VLAN ID {vid} jest już w użyciu.")
-
-    # Wybieramy pierwszy VLAN do koloru
-    first_vlan_id = int(allowed_vlans[0])
     if used_vlans is None:
         used_vlans = {}
 
-    lines = ["configure terminal"]
-
-    # Upewnienie się, że VLANy istnieją
+    # Sprawdzenie, czy wszystkie VLANy są już utworzone
     for vid_str in allowed_vlans:
         vid = int(vid_str)
-        lines.append(f"vlan {vid}")
-        lines.append(f" name VLAN_{vid}")
-        lines.append("exit")
+        if vid not in used_vlans:
+            raise TemplateError(f"VLAN ID {vid} nie istnieje. Utwórz VLAN przed przypisaniem do trunku.")
+
+    lines = ["configure terminal"]
 
     for port in selected_ports:
         lines.append(f"interface {port}")
         if description:
             lines.append(f" description {description}")
+        lines.append(" switchport trunk encapsulation dot1q")
         lines.append(" switchport mode trunk")
         lines.append(f" switchport trunk allowed vlan {allowed_vlans_out}")
         lines.append(" no shutdown")
         lines.append("exit")
+        lines.append("ip routing")
 
-    lines.append("end")
 
     return "\n".join(lines)
 
@@ -305,7 +319,6 @@ def set_native_vlan(params, selected_ports, used_vlans=None):
         lines.append(" no shutdown")
         lines.append("exit")
 
-    lines.append("end")
 
     return "\n".join(lines)
 
@@ -345,7 +358,6 @@ def apply_nat(params, selected_ports):
         lines.append(" no shutdown")
         lines.append("exit")
 
-    lines.append("end")
 
     return "\n".join(lines)
 
@@ -403,7 +415,6 @@ def apply_static_routing(params, selected_ports):
     # Add static route
     lines.append(f"ip route {destination_network} {subnet_mask} {next_hop_ip}")
 
-    lines.append("end")
 
     return "\n".join(lines)
 
@@ -484,13 +495,11 @@ def apply_dynamic_routing(params, selected_ports):
 
     if routing_protocol == "OSPF":
         lines.append(f"router ospf {process_id}")
-        lines.append(f" area {area_id} stub")  # Example configuration
         lines.extend(validated_networks)
     elif routing_protocol == "EIGRP":
         lines.append(f"router eigrp {process_id}")
         lines.extend(validated_networks)
 
-    lines.append("end")
 
     return "\n".join(lines)
 
@@ -654,7 +663,6 @@ def enable_vlan(params, selected_ports):
         lines.append(" no shutdown")
         lines.append("exit")
 
-    lines.append("end")
 
     return "\n".join(lines)
 

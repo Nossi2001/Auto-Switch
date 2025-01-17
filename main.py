@@ -1,6 +1,7 @@
 # main.py
 import sys
-from PyQt6 import QtWidgets
+from PyQt6 import QtWidgets, QtGui
+
 from pages.start_page import StartPage
 from pages.config_page import ConfigPage
 
@@ -9,10 +10,11 @@ def main():
     
     # Set the application-wide style sheet
     app.setStyleSheet("QMainWindow { background-color: #2B2B2B; }")
-    
+    app.setWindowIcon(QtGui.QIcon("AutoSwitchLogo.ico"))
     main_window = QtWidgets.QMainWindow()
     main_window.setWindowTitle("Konfigurator Urządzeń Sieciowych")
 
+    main_window.setWindowIcon(QtGui.QIcon("AutoSwitchLogo.ico"))
     stacked_widget = QtWidgets.QStackedWidget()
     main_window.setCentralWidget(stacked_widget)
 
