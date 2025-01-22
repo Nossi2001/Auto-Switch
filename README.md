@@ -1,18 +1,19 @@
-![1](https://github.com/user-attachments/assets/13b6f8e2-13ec-49d8-95a1-e92cbcec6b9c)
+![1](https://github.com/user-attachments/assets/cf3510bc-781c-43f7-8a47-91f2fcfa679f)
 
-Pierwsze okno aplikacji
+Główne okno aplikacji
+- można tu wybrać typ oraz model urządzenia do konfiguracji
 
-![2](https://github.com/user-attachments/assets/f9a3ac27-fac4-4f09-9d98-d90d4eb5f12c)
+![2](https://github.com/user-attachments/assets/18a55c08-56e6-4dae-9744-ba7ae38e56ff)
 
-Przykłądowy skan sieci
+Poboczne okno aplikacji
+- wizualizacja ilości portów danego urządzenia
+- lista możliwych metod do urzycia na danym urządzeniu
+- formularz do danej metody
+- przycisk zapisujący konfiguracje
+- przycisk nawigacyjny "Wróć"(wraca do okna głównego)
+- przycisk "Skopiuj całą konfiguracje"(kopiuje do schowka)
+- przycisk "Prześlij do pliku"(umorzliwia exportowanie pliku txt)
 
-![3](https://github.com/user-attachments/assets/518e2eab-173f-4bde-a904-e1cec316015a)
+![3](https://github.com/user-attachments/assets/138f89a6-e1f0-4ff6-93e3-2a15c76c17da)
 
-formularz do logowania się do routera
-
-![4](https://github.com/user-attachments/assets/24ff21c3-f66b-4486-9235-91e8fa97b6b5)
-
-Przyciski: 
-Zastosuj - Zmienia Adres IP
-Backup - Tworzy plik z konfiguracją
-Wyjdź - wychodzi z aplikacji
+Przkładowy alert (w tym przpadku pokazujący zastosowaną konfiguracje)
